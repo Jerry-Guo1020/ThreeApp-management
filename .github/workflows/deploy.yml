@@ -1,0 +1,59 @@
+name: Deploy ThreeApp Management
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Enable pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@10.24.0 --activate
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm run build
+
+      - name: Package app
+        run: tar -czf threeapp-management.tar.gz -C dist .
+
+      - name: Upload package to server
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s' "${{ secrets.JD_SERVER_SSH_KEY_B64 }}" | base64 -d > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keygen -y -f ~/.ssh/deploy_key > /dev/null
+          ssh-keyscan -p "${{ secrets.JD_SERVER_PORT }}" "${{ secrets.JD_SERVER_HOST }}" >> ~/.ssh/known_hosts
+          scp -P "${{ secrets.JD_SERVER_PORT }}" \
+            -i ~/.ssh/deploy_key \
+            threeapp-management.tar.gz \
+            "${{ secrets.JD_SERVER_USER }}@${{ secrets.JD_SERVER_HOST }}:/tmp/threeapp-management.tar.gz"
+
+      - name: Deploy on server
+        run: |
+          ssh -p "${{ secrets.JD_SERVER_PORT }}" \
+            -i ~/.ssh/deploy_key \
+            "${{ secrets.JD_SERVER_USER }}@${{ secrets.JD_SERVER_HOST }}" << 'EOF'
+              set -e
+
+              APP_DIR="/root/apps/threeapp/management"
+
+              mkdir -p "$APP_DIR"
+              rm -rf "$APP_DIR"/*
+              tar -xzf /tmp/threeapp-management.tar.gz -C "$APP_DIR"
+          EOF
