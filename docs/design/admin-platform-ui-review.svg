@@ -1,0 +1,561 @@
+<svg width="4200" height="4200" viewBox="0 0 4200 4200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="16" flood-color="#0F172A" flood-opacity="0.08"/>
+    </filter>
+    <style>
+      .font { font-family: "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", Arial, sans-serif; }
+      .page-title { font-size: 30px; font-weight: 800; fill: #0F172A; }
+      .frame-title { font-size: 22px; font-weight: 800; fill: #0F172A; }
+      .title { font-size: 20px; font-weight: 800; fill: #0F172A; }
+      .h3 { font-size: 16px; font-weight: 800; fill: #0F172A; }
+      .body { font-size: 14px; font-weight: 500; fill: #334155; }
+      .muted { font-size: 13px; font-weight: 500; fill: #64748B; }
+      .small { font-size: 12px; font-weight: 500; fill: #64748B; }
+      .tiny { font-size: 11px; font-weight: 700; fill: #64748B; }
+      .label { font-size: 12px; font-weight: 800; fill: #64748B; letter-spacing: 1.2px; }
+      .button { font-size: 13px; font-weight: 800; fill: #FFFFFF; }
+      .button-dark { font-size: 13px; font-weight: 800; fill: #0F766E; }
+      .nav { font-size: 14px; font-weight: 650; fill: #475569; }
+      .nav-active { font-size: 14px; font-weight: 800; fill: #0F766E; }
+      .metric { font-size: 30px; font-weight: 850; fill: #0F172A; }
+      .white { fill: #FFFFFF; }
+    </style>
+  </defs>
+
+  <rect width="4200" height="4200" fill="#EEF2F7"/>
+  <text x="80" y="64" class="font page-title">ThreeApp 商品内容管理平台 - Tailwind UI 审核稿 v2</text>
+  <text x="80" y="96" class="font muted">设计基于 Tailwind CSS 后台壳：bg-slate-50、bg-white、border-slate-200、rounded-lg、shadow-sm、table、tabs、drawer、modal、toast、pagination。</text>
+
+  <g id="tailwind-shell">
+    <text x="80" y="154" class="font frame-title">01 / 登录页与 Tailwind 后台壳</text>
+    <rect x="80" y="180" width="780" height="500" rx="12" fill="#FFFFFF" filter="url(#softShadow)"/>
+    <rect x="80" y="180" width="310" height="500" rx="12" fill="#0F766E"/>
+    <rect x="116" y="218" width="48" height="48" rx="8" fill="#FFFFFF"/>
+    <text x="131" y="250" class="font" font-size="20" font-weight="850" fill="#0F766E">T</text>
+    <text x="116" y="326" class="font white" font-size="30" font-weight="850">ThreeApp</text>
+    <text x="116" y="358" class="font" font-size="15" font-weight="650" fill="#CCFBF1">商品内容管理平台</text>
+    <text x="116" y="426" class="font" font-size="14" font-weight="600" fill="#A7F3D0">管理酒水、特产、评论、问答、首页内容和素材。</text>
+    <rect x="430" y="224" width="360" height="364" rx="10" fill="#FFFFFF"/>
+    <text x="430" y="254" class="font title">管理员登录</text>
+    <text x="430" y="282" class="font muted">Tailwind 表单布局：space-y-5 + rounded-lg inputs</text>
+    <text x="430" y="336" class="font small">账号</text>
+    <rect x="430" y="354" width="330" height="44" rx="8" fill="#F8FAFC" stroke="#CBD5E1"/>
+    <text x="450" y="382" class="font muted">admin@threeapp.com</text>
+    <text x="430" y="432" class="font small">密码</text>
+    <rect x="430" y="450" width="330" height="44" rx="8" fill="#F8FAFC" stroke="#CBD5E1"/>
+    <text x="450" y="478" class="font muted">••••••••••</text>
+    <rect x="430" y="528" width="330" height="44" rx="8" fill="#0F766E"/>
+    <text x="580" y="556" class="font button">登录</text>
+
+    <rect x="900" y="180" width="1320" height="500" rx="12" fill="#F8FAFC" filter="url(#softShadow)"/>
+    <rect x="900" y="180" width="256" height="500" rx="12" fill="#FFFFFF"/>
+    <line x1="1156" y1="180" x2="1156" y2="680" stroke="#E2E8F0"/>
+    <rect x="928" y="208" width="40" height="40" rx="8" fill="#0F766E"/>
+    <text x="941" y="234" class="font white" font-size="16" font-weight="850">T</text>
+    <text x="980" y="226" class="font h3">ThreeApp</text>
+    <text x="980" y="244" class="font tiny">admin shell</text>
+    <text x="928" y="292" class="font label">菜单</text>
+    <rect x="920" y="312" width="210" height="38" rx="8" fill="#CCFBF1"/>
+    <text x="952" y="336" class="font nav-active">工作台</text>
+    <text x="952" y="386" class="font nav">酒水商品</text>
+    <text x="952" y="430" class="font nav">特产商品</text>
+    <text x="952" y="474" class="font nav">商品更新</text>
+    <text x="952" y="518" class="font nav">评论管理</text>
+    <text x="952" y="562" class="font nav">问答管理</text>
+    <text x="952" y="606" class="font nav">内容配置</text>
+    <text x="952" y="650" class="font nav">素材管理</text>
+    <rect x="1156" y="180" width="1064" height="64" rx="12" fill="#FFFFFF"/>
+    <text x="1186" y="220" class="font title">工作台</text>
+    <rect x="1758" y="196" width="260" height="34" rx="8" fill="#F1F5F9"/>
+    <text x="1780" y="218" class="font muted">搜索商品、评论、问答</text>
+    <rect x="2032" y="196" width="142" height="34" rx="8" fill="#0F766E"/>
+    <text x="2064" y="218" class="font button">新增内容</text>
+    <rect x="1186" y="274" width="220" height="116" rx="8" fill="#FFFFFF" stroke="#E2E8F0"/>
+    <text x="1210" y="306" class="font muted">今日评论</text>
+    <text x="1210" y="350" class="font metric">86</text>
+    <text x="1210" y="372" class="font small">默认前台展示</text>
+    <rect x="1424" y="274" width="220" height="116" rx="8" fill="#FFFFFF" stroke="#E2E8F0"/>
+    <text x="1448" y="306" class="font muted">待回复问答</text>
+    <text x="1448" y="350" class="font metric">12</text>
+    <text x="1448" y="372" class="font small">酒水 7 / 特产 5</text>
+    <rect x="1662" y="274" width="220" height="116" rx="8" fill="#FFFFFF" stroke="#E2E8F0"/>
+    <text x="1686" y="306" class="font muted">商品更新</text>
+    <text x="1686" y="350" class="font metric">09</text>
+    <text x="1686" y="372" class="font small">本周新增</text>
+    <rect x="1900" y="274" width="220" height="116" rx="8" fill="#FFFFFF" stroke="#E2E8F0"/>
+    <text x="1924" y="306" class="font muted">素材待整理</text>
+    <text x="1924" y="350" class="font metric">34</text>
+    <text x="1924" y="372" class="font small">图片资源</text>
+    <rect x="1186" y="420" width="934" height="206" rx="8" fill="#FFFFFF" stroke="#E2E8F0"/>
+    <text x="1210" y="458" class="font title">Tailwind 组件约定</text>
+    <rect x="1210" y="484" width="170" height="28" rx="6" fill="#F1F5F9"/>
+    <text x="1230" y="503" class="font tiny">layout: flex h-screen</text>
+    <rect x="1392" y="484" width="196" height="28" rx="6" fill="#F1F5F9"/>
+    <text x="1412" y="503" class="font tiny">sidebar: w-64 border-r</text>
+    <rect x="1600" y="484" width="178" height="28" rx="6" fill="#F1F5F9"/>
+    <text x="1620" y="503" class="font tiny">card: rounded-lg border</text>
+    <rect x="1790" y="484" width="158" height="28" rx="6" fill="#F1F5F9"/>
+    <text x="1810" y="503" class="font tiny">table: divide-y</text>
+    <text x="1210" y="548" class="font body">后续前端实现时直接按 Tailwind CSS class 写：bg-slate-50、bg-white、text-slate-900、border-slate-200、rounded-lg、shadow-sm。</text>
+  </g>
+
+  <g id="product-management">
+    <text x="80" y="780" class="font frame-title">02 / 商品管理：酒水商品和特产商品分开管理</text>
+    <rect x="80" y="806" width="1940" height="770" rx="12" fill="#F8FAFC" filter="url(#softShadow)"/>
+    <rect x="112" y="838" width="1876" height="72" rx="8" fill="#FFFFFF" stroke="#E2E8F0"/>
+    <text x="140" y="882" class="font title">商品管理</text>
+    <rect x="1310" y="856" width="160" height="36" rx="8" fill="#F1F5F9"/>
+    <text x="1336" y="879" class="font muted">搜索商品</text>
+    <rect x="1484" y="856" width="128" height="36" rx="8" fill="#F8FAFC" stroke="#CBD5E1"/>
+    <text x="1514" y="879" class="font muted">导入数据</text>
+    <rect x="1626" y="856" width="150" height="36" rx="8" fill="#0F766E"/>
+    <text x="1654" y="879" class="font button">新增酒水商品</text>
+    <rect x="1790" y="856" width="150" height="36" rx="8" fill="#14B8A6"/>
+    <text x="1818" y="879" class="font button">新增特产商品</text>
+
+    <rect x="112" y="938" width="916" height="594" rx="8" fill="#FFFFFF" stroke="#E2E8F0"/>
+    <rect x="140" y="966" width="158" height="36" rx="8" fill="#CCFBF1"/>
+    <text x="180" y="989" class="font nav-active">酒水商品</text>
+    <rect x="310" y="966" width="138" height="36" rx="8" fill="#F8FAFC" stroke="#E2E8F0"/>
+    <text x="342" y="989" class="font muted">上架中 3</text>
+    <text x="140" y="1048" class="font small">商品</text>
+    <text x="404" y="1048" class="font small">风味 / 场景</text>
+    <text x="568" y="1048" class="font small">标签</text>
+    <text x="704" y="1048" class="font small">评论</text>
+    <text x="820" y="1048" class="font small">操作</text>
+    <line x1="140" y1="1068" x2="1000" y2="1068" stroke="#E2E8F0"/>
+    <rect x="140" y="1094" width="54" height="54" rx="8" fill="#E2E8F0"/>
+    <text x="210" y="1118" class="font body">波本蓝君邑 XO</text>
+    <text x="210" y="1140" class="font small">高端威士忌 · 礼赠</text>
+    <text x="404" y="1128" class="font body">商务馈赠</text>
+    <rect x="568" y="1110" width="48" height="24" rx="12" fill="#FEF3C7"/>
+    <text x="581" y="1126" class="font tiny" fill="#92400E">主推</text>
+    <text x="704" y="1128" class="font body">32 条</text>
+    <text x="820" y="1128" class="font" font-size="13" font-weight="800" fill="#0F766E">编辑  更新  评论</text>
+    <line x1="140" y1="1172" x2="1000" y2="1172" stroke="#E2E8F0"/>
+    <rect x="140" y="1198" width="54" height="54" rx="8" fill="#E2E8F0"/>
+    <text x="210" y="1222" class="font body">福莱好日子</text>
+    <text x="210" y="1244" class="font small">喜庆专用酒 · 婚宴</text>
+    <text x="404" y="1232" class="font body">结婚宴席</text>
+    <rect x="568" y="1214" width="48" height="24" rx="12" fill="#DBEAFE"/>
+    <text x="581" y="1230" class="font tiny" fill="#1D4ED8">喜宴</text>
+    <text x="704" y="1232" class="font body">18 条</text>
+    <text x="820" y="1232" class="font" font-size="13" font-weight="800" fill="#0F766E">编辑  更新  评论</text>
+    <line x1="140" y1="1276" x2="1000" y2="1276" stroke="#E2E8F0"/>
+    <rect x="140" y="1302" width="54" height="54" rx="8" fill="#E2E8F0"/>
+    <text x="210" y="1326" class="font body">西凤酒</text>
+    <text x="210" y="1348" class="font small">凤香经典 · 长辈礼赠</text>
+    <text x="404" y="1336" class="font body">商务 / 家宴</text>
+    <rect x="568" y="1318" width="48" height="24" rx="12" fill="#DCFCE7"/>
+    <text x="581" y="1334" class="font tiny" fill="#166534">经典</text>
+    <text x="704" y="1336" class="font body">86 条</text>
+    <text x="820" y="1336" class="font" font-size="13" font-weight="800" fill="#0F766E">编辑  更新  评论</text>
+    <rect x="140" y="1410" width="832" height="88" rx="8" fill="#F8FAFC"/>
+    <text x="164" y="1442" class="font h3">酒水数据表建议字段</text>
+    <text x="164" y="1470" class="font muted">name、image、badge、scene、description、tasteType、detailSellingPoints、contactText、sort、status</text>
+
+    <rect x="1060" y="938" width="900" height="594" rx="8" fill="#FFFFFF" stroke="#E2E8F0"/>
+    <rect x="1088" y="966" width="158" height="36" rx="8" fill="#CCFBF1"/>
+    <text x="1128" y="989" class="font nav-active">特产商品</text>
+    <rect x="1258" y="966" width="154" height="36" rx="8" fill="#F8FAFC" stroke="#E2E8F0"/>
+    <text x="1288" y="989" class="font muted">上架中 12</text>
+    <text x="1088" y="1048" class="font small">商品</text>
+    <text x="1368" y="1048" class="font small">分类 / 产地</text>
+    <text x="1532" y="1048" class="font small">标签</text>
+    <text x="1664" y="1048" class="font small">评论</text>
+    <text x="1780" y="1048" class="font small">操作</text>
+    <line x1="1088" y1="1068" x2="1932" y2="1068" stroke="#E2E8F0"/>
+    <rect x="1088" y="1094" width="54" height="54" rx="8" fill="#E2E8F0"/>
+    <text x="1158" y="1118" class="font body">清远走地鸡</text>
+    <text x="1158" y="1140" class="font small">清远农家 · 散养</text>
+    <text x="1368" y="1128" class="font body">清远特产</text>
+    <rect x="1532" y="1110" width="48" height="24" rx="12" fill="#FEF3C7"/>
+    <text x="1545" y="1126" class="font tiny" fill="#92400E">热销</text>
+    <text x="1664" y="1128" class="font body">24 条</text>
+    <text x="1780" y="1128" class="font" font-size="13" font-weight="800" fill="#0F766E">编辑  更新  评论</text>
+    <line x1="1088" y1="1172" x2="1932" y2="1172" stroke="#E2E8F0"/>
+    <rect x="1088" y="1198" width="54" height="54" rx="8" fill="#E2E8F0"/>
+    <text x="1158" y="1222" class="font body">英德红茶 英红九号</text>
+    <text x="1158" y="1244" class="font small">英德茶业 · 一级红茶</text>
+    <text x="1368" y="1232" class="font body">茶叶冲饮</text>
+    <rect x="1532" y="1214" width="48" height="24" rx="12" fill="#DBEAFE"/>
+    <text x="1545" y="1230" class="font tiny" fill="#1D4ED8">推荐</text>
+    <text x="1664" y="1232" class="font body">15 条</text>
+    <text x="1780" y="1232" class="font" font-size="13" font-weight="800" fill="#0F766E">编辑  更新  评论</text>
+    <line x1="1088" y1="1276" x2="1932" y2="1276" stroke="#E2E8F0"/>
+    <rect x="1088" y="1302" width="54" height="54" rx="8" fill="#E2E8F0"/>
+    <text x="1158" y="1326" class="font body">阳山冬笋</text>
+    <text x="1158" y="1348" class="font small">阳山特产 · 高山竹笋</text>
+    <text x="1368" y="1336" class="font body">山珍蔬食</text>
+    <rect x="1532" y="1318" width="48" height="24" rx="12" fill="#DCFCE7"/>
+    <text x="1545" y="1334" class="font tiny" fill="#166534">新鲜</text>
+    <text x="1664" y="1336" class="font body">9 条</text>
+    <text x="1780" y="1336" class="font" font-size="13" font-weight="800" fill="#0F766E">编辑  更新  评论</text>
+    <rect x="1088" y="1410" width="816" height="88" rx="8" fill="#F8FAFC"/>
+    <text x="1112" y="1442" class="font h3">特产数据表建议字段</text>
+    <text x="1112" y="1470" class="font muted">title、imageUrl、brand、tags、category、origin、badge、regionId、url、sort、status</text>
+  </g>
+
+  <g id="product-drawers">
+    <text x="2060" y="780" class="font frame-title">03 / 新增与编辑：Tailwind Drawer / Modal</text>
+    <rect x="2060" y="806" width="980" height="770" rx="12" fill="#CBD5E1"/>
+    <rect x="2140" y="846" width="420" height="690" rx="10" fill="#FFFFFF" filter="url(#softShadow)"/>
+    <text x="2170" y="888" class="font title">新增酒水商品</text>
+    <text x="2170" y="916" class="font muted">右侧抽屉 w-[420px]，适合表单编辑</text>
+    <text x="2170" y="966" class="font small">酒水名称</text>
+    <rect x="2170" y="984" width="342" height="42" rx="8" fill="#F8FAFC" stroke="#CBD5E1"/>
+    <text x="2190" y="1010" class="font muted">波本蓝君邑 XO</text>
+    <text x="2170" y="1064" class="font small">风味 / 使用场景</text>
+    <rect x="2170" y="1082" width="160" height="42" rx="8" fill="#F8FAFC" stroke="#CBD5E1"/>
+    <text x="2190" y="1108" class="font muted">威士忌</text>
+    <rect x="2352" y="1082" width="160" height="42" rx="8" fill="#F8FAFC" stroke="#CBD5E1"/>
+    <text x="2372" y="1108" class="font muted">商务馈赠</text>
+    <text x="2170" y="1162" class="font small">详情卖点</text>
+    <rect x="2170" y="1180" width="342" height="86" rx="8" fill="#F8FAFC" stroke="#CBD5E1"/>
+    <text x="2190" y="1210" class="font muted">高端威士忌，醇厚绵柔...</text>
+    <text x="2170" y="1304" class="font small">展示配置</text>
+    <rect x="2170" y="1322" width="94" height="30" rx="15" fill="#CCFBF1"/>
+    <text x="2190" y="1342" class="font tiny" fill="#0F766E">热门酒水</text>
+    <rect x="2276" y="1322" width="94" height="30" rx="15" fill="#F1F5F9"/>
+    <text x="2296" y="1342" class="font tiny">详情推荐</text>
+    <rect x="2382" y="1322" width="94" height="30" rx="15" fill="#F1F5F9"/>
+    <text x="2402" y="1342" class="font tiny">联系入口</text>
+    <rect x="2296" y="1468" width="92" height="40" rx="8" fill="#F8FAFC" stroke="#CBD5E1"/>
+    <text x="2324" y="1493" class="font muted">取消</text>
+    <rect x="2402" y="1468" width="110" height="40" rx="8" fill="#0F766E"/>
+    <text x="2430" y="1493" class="font button">保存</text>
+
+    <rect x="2600" y="846" width="380" height="690" rx="10" fill="#FFFFFF" filter="url(#softShadow)"/>
+    <text x="2630" y="888" class="font title">新增特产商品</text>
+    <text x="2630" y="916" class="font muted">字段与酒水分开，绑定分类与地区</text>
+    <text x="2630" y="966" class="font small">商品标题</text>
+    <rect x="2630" y="984" width="302" height="42" rx="8" fill="#F8FAFC" stroke="#CBD5E1"/>
+    <text x="2650" y="1010" class="font muted">清远走地鸡 散养土鸡</text>
+    <text x="2630" y="1064" class="font small">分类 / 地区</text>
+    <rect x="2630" y="1082" width="140" height="42" rx="8" fill="#F8FAFC" stroke="#CBD5E1"/>
+    <text x="2650" y="1108" class="font muted">清远特产</text>
+    <rect x="2792" y="1082" width="140" height="42" rx="8" fill="#F8FAFC" stroke="#CBD5E1"/>
+    <text x="2812" y="1108" class="font muted">广东清远</text>
+    <text x="2630" y="1162" class="font small">品牌 / 标签</text>
+    <rect x="2630" y="1180" width="302" height="42" rx="8" fill="#F8FAFC" stroke="#CBD5E1"/>
+    <text x="2650" y="1206" class="font muted">清远农家，热销，散养</text>
+    <text x="2630" y="1262" class="font small">封面图与详情图</text>
+    <rect x="2630" y="1282" width="78" height="78" rx="8" fill="#F8FAFC" stroke="#CBD5E1" stroke-dasharray="5 5"/>
+    <text x="2652" y="1327" class="font small">上传</text>
+    <rect x="2722" y="1282" width="78" height="78" rx="8" fill="#F8FAFC" stroke="#CBD5E1" stroke-dasharray="5 5"/>
+    <text x="2744" y="1327" class="font small">上传</text>
+    <rect x="2814" y="1282" width="78" height="78" rx="8" fill="#F8FAFC" stroke="#CBD5E1" stroke-dasharray="5 5"/>
+    <text x="2836" y="1327" class="font small">上传</text>
+    <rect x="2716" y="1468" width="92" height="40" rx="8" fill="#F8FAFC" stroke="#CBD5E1"/>
+    <text x="2744" y="1493" class="font muted">取消</text>
+    <rect x="2822" y="1468" width="110" height="40" rx="8" fill="#0F766E"/>
+    <text x="2850" y="1493" class="font button">保存</text>
+  </g>
+
+  <g id="updates-and-comments">
+    <text x="80" y="1684" class="font frame-title">04 / 商品更新与评论管理：默认展示，后台后期管理</text>
+    <rect x="80" y="1710" width="1460" height="760" rx="12" fill="#F8FAFC" filter="url(#softShadow)"/>
+    <rect x="112" y="1742" width="668" height="696" rx="8" fill="#FFFFFF" stroke="#E2E8F0"/>
+    <text x="140" y="1782" class="font title">商品更新管理</text>
+    <rect x="140" y="1810" width="112" height="34" rx="8" fill="#CCFBF1"/>
+    <text x="168" y="1832" class="font nav-active">酒水</text>
+    <rect x="262" y="1810" width="112" height="34" rx="8" fill="#F8FAFC" stroke="#E2E8F0"/>
+    <text x="290" y="1832" class="font muted">特产</text>
+    <rect x="628" y="1810" width="116" height="34" rx="8" fill="#0F766E"/>
+    <text x="652" y="1832" class="font button">新增更新</text>
+    <rect x="140" y="1874" width="604" height="78" rx="8" fill="#F8FAFC"/>
+    <text x="164" y="1904" class="font body">西凤酒：礼盒图片更新</text>
+    <text x="164" y="1928" class="font small">展示于商品详情 · 已发布 · 2026-06-22</text>
+    <rect x="140" y="1968" width="604" height="78" rx="8" fill="#F8FAFC"/>
+    <text x="164" y="1998" class="font body">波本蓝君邑 XO：补充商务馈赠说明</text>
+    <text x="164" y="2022" class="font small">展示于酒水页热销榜 · 草稿</text>
+    <rect x="140" y="2062" width="604" height="78" rx="8" fill="#F8FAFC"/>
+    <text x="164" y="2092" class="font body">福莱好日子：婚宴场景图替换</text>
+    <text x="164" y="2116" class="font small">展示于选酒场景 · 定时发布</text>
+    <rect x="140" y="2174" width="604" height="216" rx="8" fill="#F1F5F9"/>
+    <text x="164" y="2210" class="font h3">新增更新弹窗</text>
+    <text x="164" y="2248" class="font small">选择商品</text>
+    <rect x="164" y="2266" width="250" height="38" rx="8" fill="#FFFFFF" stroke="#CBD5E1"/>
+    <text x="184" y="2290" class="font muted">西凤酒</text>
+    <text x="438" y="2248" class="font small">更新类型</text>
+    <rect x="438" y="2266" width="150" height="38" rx="8" fill="#FFFFFF" stroke="#CBD5E1"/>
+    <text x="458" y="2290" class="font muted">图片 / 文案</text>
+    <rect x="164" y="2324" width="424" height="46" rx="8" fill="#FFFFFF" stroke="#CBD5E1"/>
+    <text x="184" y="2353" class="font muted">输入这次商品更新信息...</text>
+
+    <rect x="812" y="1742" width="696" height="696" rx="8" fill="#FFFFFF" stroke="#E2E8F0"/>
+    <text x="840" y="1782" class="font title">评论管理入口</text>
+    <text x="840" y="1810" class="font muted">先按商品查看评论概况，进入详情后管理全部评论与二级评论</text>
+    <rect x="840" y="1838" width="112" height="34" rx="8" fill="#CCFBF1"/>
+    <text x="868" y="1860" class="font nav-active">酒水</text>
+    <rect x="962" y="1838" width="112" height="34" rx="8" fill="#F8FAFC" stroke="#E2E8F0"/>
+    <text x="990" y="1860" class="font muted">特产</text>
+    <rect x="840" y="1902" width="632" height="72" rx="8" fill="#F8FAFC"/>
+    <text x="864" y="1932" class="font body">西凤酒</text>
+    <text x="864" y="1954" class="font small">86 条评论 · 24 条二级回复 · 最近 2 小时前</text>
+    <text x="1370" y="1944" class="font" font-size="13" font-weight="800" fill="#0F766E">进入评论</text>
+    <rect x="840" y="1990" width="632" height="72" rx="8" fill="#F8FAFC"/>
+    <text x="864" y="2020" class="font body">波本蓝君邑 XO</text>
+    <text x="864" y="2042" class="font small">32 条评论 · 8 条二级回复 · 1 条被标记</text>
+    <text x="1370" y="2032" class="font" font-size="13" font-weight="800" fill="#0F766E">进入评论</text>
+    <rect x="840" y="2078" width="632" height="72" rx="8" fill="#F8FAFC"/>
+    <text x="864" y="2108" class="font body">福莱好日子</text>
+    <text x="864" y="2130" class="font small">18 条评论 · 3 条二级回复 · 无异常</text>
+    <text x="1370" y="2120" class="font" font-size="13" font-weight="800" fill="#0F766E">进入评论</text>
+    <rect x="840" y="2188" width="632" height="202" rx="8" fill="#F1F5F9"/>
+    <text x="864" y="2224" class="font h3">规则说明</text>
+    <text x="864" y="2260" class="font body">评论默认直接前台展示，不走强审核流程。</text>
+    <text x="864" y="2294" class="font body">后台主要用于：删除不合适评论、回复用户、置顶优质评论、查看二级评论。</text>
+    <text x="864" y="2328" class="font body">如果后续需要敏感词或举报，再补充“标记异常”队列。</text>
+  </g>
+
+  <g id="comment-detail">
+    <text x="1580" y="1684" class="font frame-title">05 / 单商品评论详情：全部评论与二级评论</text>
+    <rect x="1580" y="1710" width="1460" height="760" rx="12" fill="#F8FAFC" filter="url(#softShadow)"/>
+    <rect x="1612" y="1742" width="1396" height="72" rx="8" fill="#FFFFFF" stroke="#E2E8F0"/>
+    <text x="1640" y="1786" class="font title">西凤酒 · 评论详情</text>
+    <rect x="2450" y="1760" width="132" height="36" rx="8" fill="#F1F5F9"/>
+    <text x="2476" y="1783" class="font muted">有图评论</text>
+    <rect x="2598" y="1760" width="132" height="36" rx="8" fill="#F1F5F9"/>
+    <text x="2624" y="1783" class="font muted">按评分筛选</text>
+    <rect x="2746" y="1760" width="132" height="36" rx="8" fill="#F8FAFC" stroke="#CBD5E1"/>
+    <text x="2774" y="1783" class="font muted">批量操作</text>
+    <rect x="1612" y="1844" width="900" height="594" rx="8" fill="#FFFFFF" stroke="#E2E8F0"/>
+    <rect x="1640" y="1872" width="844" height="160" rx="8" fill="#F8FAFC"/>
+    <text x="1664" y="1904" class="font body">老陕酒客 · 5 星 · 2026-04-20</text>
+    <text x="1664" y="1932" class="font muted">凤香经典，入口绵柔不辣喉。开瓶就能闻到浓郁的粮食香...</text>
+    <rect x="1664" y="1954" width="58" height="44" rx="6" fill="#E2E8F0"/>
+    <rect x="1732" y="1954" width="58" height="44" rx="6" fill="#E2E8F0"/>
+    <text x="2268" y="1906" class="font" font-size="13" font-weight="800" fill="#0F766E">回复</text>
+    <text x="2316" y="1906" class="font" font-size="13" font-weight="800" fill="#B91C1C">删除</text>
+    <rect x="1688" y="2008" width="760" height="42" rx="8" fill="#FFFFFF" stroke="#E2E8F0"/>
+    <text x="1712" y="2034" class="font small">商家回复：感谢认可，后续会继续优化包装防震。</text>
+    <rect x="1640" y="2062" width="844" height="132" rx="8" fill="#F8FAFC"/>
+    <text x="1664" y="2094" class="font body">陈老板 · 5 星 · 2026-04-18</text>
+    <text x="1664" y="2122" class="font muted">买来送礼很体面，礼盒做工不错，金色元素很高级。</text>
+    <text x="2268" y="2096" class="font" font-size="13" font-weight="800" fill="#0F766E">回复</text>
+    <text x="2316" y="2096" class="font" font-size="13" font-weight="800" fill="#B91C1C">删除</text>
+    <rect x="1640" y="2224" width="844" height="132" rx="8" fill="#F8FAFC"/>
+    <text x="1664" y="2256" class="font body">品酒师小李 · 4 星 · 2026-04-15</text>
+    <text x="1664" y="2284" class="font muted">风格识别度很高，物流外箱再扎实一点会更好。</text>
+    <text x="2268" y="2258" class="font" font-size="13" font-weight="800" fill="#0F766E">回复</text>
+    <text x="2316" y="2258" class="font" font-size="13" font-weight="800" fill="#B91C1C">删除</text>
+
+    <rect x="2546" y="1844" width="430" height="594" rx="8" fill="#FFFFFF" stroke="#E2E8F0"/>
+    <text x="2576" y="1884" class="font title">回复评论弹窗</text>
+    <text x="2576" y="1912" class="font muted">二级评论由后台商家回复产生</text>
+    <text x="2576" y="1960" class="font small">回复内容</text>
+    <rect x="2576" y="1978" width="340" height="114" rx="8" fill="#F8FAFC" stroke="#CBD5E1"/>
+    <text x="2596" y="2010" class="font muted">输入商家回复...</text>
+    <text x="2576" y="2138" class="font small">操作</text>
+    <rect x="2576" y="2160" width="96" height="34" rx="8" fill="#F8FAFC" stroke="#CBD5E1"/>
+    <text x="2602" y="2182" class="font muted">置顶</text>
+    <rect x="2684" y="2160" width="116" height="34" rx="8" fill="#F8FAFC" stroke="#CBD5E1"/>
+    <text x="2710" y="2182" class="font muted">标记处理</text>
+    <rect x="2576" y="2238" width="340" height="70" rx="8" fill="#FEF2F2"/>
+    <text x="2596" y="2268" class="font body">删除评论确认</text>
+    <text x="2596" y="2292" class="font small">删除后前台不再展示，可保留后台日志。</text>
+    <rect x="2800" y="2368" width="116" height="40" rx="8" fill="#0F766E"/>
+    <text x="2830" y="2393" class="font button">提交回复</text>
+  </g>
+
+  <g id="content-config">
+    <text x="80" y="2580" class="font frame-title">06 / 内容配置：首页、特产、酒水、冷库全部展开</text>
+    <rect x="80" y="2606" width="2960" height="820" rx="12" fill="#F8FAFC" filter="url(#softShadow)"/>
+
+    <rect x="112" y="2638" width="690" height="350" rx="8" fill="#FFFFFF" stroke="#E2E8F0"/>
+    <text x="140" y="2680" class="font title">首页 Banner 配置</text>
+    <text x="140" y="2708" class="font muted">3 张图 · 支持排序、上下架、跳转商品</text>
+    <rect x="140" y="2740" width="624" height="56" rx="8" fill="#F8FAFC"/>
+    <text x="164" y="2774" class="font body">01 主推冷库工程</text>
+    <text x="462" y="2774" class="font muted">跳转：冷库页</text>
+    <rect x="682" y="2756" width="54" height="24" rx="12" fill="#DCFCE7"/>
+    <text x="696" y="2772" class="font tiny" fill="#166534">上架</text>
+    <rect x="140" y="2812" width="624" height="56" rx="8" fill="#F8FAFC"/>
+    <text x="164" y="2846" class="font body">02 酒水精选入口</text>
+    <text x="462" y="2846" class="font muted">跳转：酒水商品</text>
+    <rect x="682" y="2828" width="54" height="24" rx="12" fill="#DCFCE7"/>
+    <text x="696" y="2844" class="font tiny" fill="#166534">上架</text>
+    <rect x="140" y="2884" width="624" height="56" rx="8" fill="#F8FAFC"/>
+    <text x="164" y="2918" class="font body">03 岭南特产入口</text>
+    <text x="462" y="2918" class="font muted">跳转：特产分类</text>
+    <rect x="682" y="2900" width="54" height="24" rx="12" fill="#F1F5F9"/>
+    <text x="696" y="2916" class="font tiny">草稿</text>
+    <rect x="610" y="2948" width="126" height="34" rx="8" fill="#0F766E"/>
+    <text x="636" y="2970" class="font button">新增 Banner</text>
+
+    <rect x="832" y="2638" width="690" height="350" rx="8" fill="#FFFFFF" stroke="#E2E8F0"/>
+    <text x="860" y="2680" class="font title">特产模块配置</text>
+    <text x="860" y="2708" class="font muted">品牌故事、核心亮点、地区特产、分类入口</text>
+    <rect x="860" y="2740" width="288" height="78" rx="8" fill="#F8FAFC"/>
+    <text x="884" y="2772" class="font h3">品牌故事</text>
+    <text x="884" y="2796" class="font small">标题、描述、口号、展示状态</text>
+    <rect x="1168" y="2740" width="288" height="78" rx="8" fill="#F8FAFC"/>
+    <text x="1192" y="2772" class="font h3">核心亮点</text>
+    <text x="1192" y="2796" class="font small">手工制作、原产地、安全品质</text>
+    <rect x="860" y="2838" width="288" height="78" rx="8" fill="#F8FAFC"/>
+    <text x="884" y="2870" class="font h3">地区特产</text>
+    <text x="884" y="2894" class="font small">清远、潮汕、顺德及代表商品</text>
+    <rect x="1168" y="2838" width="288" height="78" rx="8" fill="#F8FAFC"/>
+    <text x="1192" y="2870" class="font h3">分类入口</text>
+    <text x="1192" y="2894" class="font small">禽肉蛋品、山珍蔬食、茶叶冲饮</text>
+    <rect x="1326" y="2948" width="130" height="34" rx="8" fill="#0F766E"/>
+    <text x="1350" y="2970" class="font button">编辑特产配置</text>
+
+    <rect x="1552" y="2638" width="690" height="350" rx="8" fill="#FFFFFF" stroke="#E2E8F0"/>
+    <text x="1580" y="2680" class="font title">酒水模块配置</text>
+    <text x="1580" y="2708" class="font muted">热门酒水、场景推荐、详情卖点、联系入口</text>
+    <rect x="1580" y="2740" width="288" height="78" rx="8" fill="#F8FAFC"/>
+    <text x="1604" y="2772" class="font h3">热门酒水</text>
+    <text x="1604" y="2796" class="font small">榜单排序、主推标签、跳转详情</text>
+    <rect x="1888" y="2740" width="288" height="78" rx="8" fill="#F8FAFC"/>
+    <text x="1912" y="2772" class="font h3">场景推荐</text>
+    <text x="1912" y="2796" class="font small">婚宴、聚会、商务、独饮</text>
+    <rect x="1580" y="2838" width="288" height="78" rx="8" fill="#F8FAFC"/>
+    <text x="1604" y="2870" class="font h3">详情卖点</text>
+    <text x="1604" y="2894" class="font small">口感、包装、物流、性价比</text>
+    <rect x="1888" y="2838" width="288" height="78" rx="8" fill="#F8FAFC"/>
+    <text x="1912" y="2870" class="font h3">联系入口</text>
+    <text x="1912" y="2894" class="font small">订购咨询、配送安排、搭配建议</text>
+    <rect x="2046" y="2948" width="130" height="34" rx="8" fill="#0F766E"/>
+    <text x="2070" y="2970" class="font button">编辑酒水配置</text>
+
+    <rect x="2272" y="2638" width="690" height="350" rx="8" fill="#FFFFFF" stroke="#E2E8F0"/>
+    <text x="2300" y="2680" class="font title">冷库项目内容</text>
+    <text x="2300" y="2708" class="font muted">服务场景、流程步骤、项目介绍、咨询按钮</text>
+    <rect x="2300" y="2740" width="288" height="78" rx="8" fill="#F8FAFC"/>
+    <text x="2324" y="2772" class="font h3">项目介绍</text>
+    <text x="2324" y="2796" class="font small">项目概况、面积、温度、吞吐量</text>
+    <rect x="2608" y="2740" width="288" height="78" rx="8" fill="#F8FAFC"/>
+    <text x="2632" y="2772" class="font h3">流程步骤</text>
+    <text x="2632" y="2796" class="font small">需求咨询、方案设计、施工安装</text>
+    <rect x="2300" y="2838" width="288" height="78" rx="8" fill="#F8FAFC"/>
+    <text x="2324" y="2870" class="font h3">服务场景</text>
+    <text x="2324" y="2894" class="font small">生鲜、冷冻、医药、餐饮连锁</text>
+    <rect x="2608" y="2838" width="288" height="78" rx="8" fill="#F8FAFC"/>
+    <text x="2632" y="2870" class="font h3">咨询按钮</text>
+    <text x="2632" y="2894" class="font small">微信咨询、电话咨询、表单留资</text>
+    <rect x="2766" y="2948" width="130" height="34" rx="8" fill="#0F766E"/>
+    <text x="2790" y="2970" class="font button">编辑冷库配置</text>
+
+    <rect x="112" y="3032" width="1398" height="336" rx="8" fill="#FFFFFF" stroke="#E2E8F0"/>
+    <text x="140" y="3074" class="font title">内容配置编辑弹窗</text>
+    <text x="140" y="3102" class="font muted">用同一个 Modal/Drawer 结构承载 Banner、模块配置、排序、上下架和跳转绑定</text>
+    <text x="140" y="3152" class="font small">内容标题</text>
+    <rect x="140" y="3170" width="320" height="40" rx="8" fill="#F8FAFC" stroke="#CBD5E1"/>
+    <text x="160" y="3195" class="font muted">岭南风味 · 地道特产</text>
+    <text x="488" y="3152" class="font small">跳转类型</text>
+    <rect x="488" y="3170" width="220" height="40" rx="8" fill="#F8FAFC" stroke="#CBD5E1"/>
+    <text x="508" y="3195" class="font muted">商品 / 分类 / 页面</text>
+    <text x="736" y="3152" class="font small">排序</text>
+    <rect x="736" y="3170" width="100" height="40" rx="8" fill="#F8FAFC" stroke="#CBD5E1"/>
+    <text x="756" y="3195" class="font muted">03</text>
+    <text x="864" y="3152" class="font small">状态</text>
+    <rect x="864" y="3170" width="112" height="40" rx="8" fill="#CCFBF1"/>
+    <text x="892" y="3195" class="font button-dark">上架</text>
+    <text x="140" y="3250" class="font small">图片素材</text>
+    <rect x="140" y="3268" width="96" height="70" rx="8" fill="#F8FAFC" stroke="#CBD5E1" stroke-dasharray="5 5"/>
+    <text x="166" y="3308" class="font small">上传</text>
+    <rect x="1200" y="3298" width="96" height="40" rx="8" fill="#F8FAFC" stroke="#CBD5E1"/>
+    <text x="1228" y="3323" class="font muted">取消</text>
+    <rect x="1310" y="3298" width="128" height="40" rx="8" fill="#0F766E"/>
+    <text x="1340" y="3323" class="font button">保存配置</text>
+
+    <rect x="1552" y="3032" width="1410" height="336" rx="8" fill="#FFFFFF" stroke="#E2E8F0"/>
+    <text x="1580" y="3074" class="font title">素材管理</text>
+    <text x="1580" y="3102" class="font muted">商品封面、Banner、详情图、评价图、地区图片分组管理，后续直接绑定到内容或商品。</text>
+    <rect x="1580" y="3138" width="154" height="116" rx="8" fill="#E2E8F0"/>
+    <text x="1618" y="3280" class="font small">商品封面</text>
+    <rect x="1760" y="3138" width="154" height="116" rx="8" fill="#E2E8F0"/>
+    <text x="1808" y="3280" class="font small">Banner</text>
+    <rect x="1940" y="3138" width="154" height="116" rx="8" fill="#E2E8F0"/>
+    <text x="1978" y="3280" class="font small">详情图片</text>
+    <rect x="2120" y="3138" width="154" height="116" rx="8" fill="#E2E8F0"/>
+    <text x="2158" y="3280" class="font small">评价图片</text>
+    <rect x="2300" y="3138" width="154" height="116" rx="8" fill="#E2E8F0"/>
+    <text x="2338" y="3280" class="font small">地区图片</text>
+    <rect x="2504" y="3138" width="360" height="188" rx="8" fill="#F8FAFC"/>
+    <text x="2530" y="3174" class="font h3">上传素材弹窗</text>
+    <rect x="2530" y="3198" width="150" height="86" rx="8" fill="#FFFFFF" stroke="#CBD5E1" stroke-dasharray="5 5"/>
+    <text x="2568" y="3248" class="font small">拖拽上传</text>
+    <rect x="2700" y="3198" width="138" height="36" rx="8" fill="#FFFFFF" stroke="#CBD5E1"/>
+    <text x="2722" y="3220" class="font muted">选择分组</text>
+    <rect x="2722" y="3284" width="116" height="34" rx="8" fill="#0F766E"/>
+    <text x="2750" y="3306" class="font button">确认上传</text>
+  </g>
+
+  <g id="detail-image-manager">
+    <text x="80" y="3520" class="font frame-title">07 / 商品详情图管理：AI 生成图片上传 + 小程序详情页预览</text>
+    <rect x="80" y="3546" width="2960" height="560" rx="12" fill="#F8FAFC" filter="url(#softShadow)"/>
+
+    <rect x="112" y="3578" width="860" height="496" rx="8" fill="#FFFFFF" stroke="#E2E8F0"/>
+    <text x="140" y="3620" class="font title">添加商品时的详情图配置</text>
+    <text x="140" y="3648" class="font muted">详情介绍不再做复杂富文本，统一上传 AI 生成详情长图/详情图，小程序按顺序渲染。</text>
+    <text x="140" y="3698" class="font small">详情图片</text>
+    <rect x="140" y="3718" width="804" height="92" rx="8" fill="#F8FAFC" stroke="#CBD5E1" stroke-dasharray="6 6"/>
+    <text x="384" y="3762" class="font body">拖拽上传详情图，支持 JPG / PNG / WebP</text>
+    <text x="418" y="3788" class="font small">建议宽度 750px，按小程序页面比例生成</text>
+
+    <rect x="140" y="3832" width="804" height="158" rx="8" fill="#FFFFFF" stroke="#E2E8F0"/>
+    <text x="164" y="3866" class="font h3">已上传详情图</text>
+    <rect x="164" y="3890" width="110" height="76" rx="8" fill="#E2E8F0"/>
+    <text x="190" y="3988" class="font small">01 主卖点</text>
+    <rect x="294" y="3890" width="110" height="76" rx="8" fill="#E2E8F0"/>
+    <text x="320" y="3988" class="font small">02 产品细节</text>
+    <rect x="424" y="3890" width="110" height="76" rx="8" fill="#E2E8F0"/>
+    <text x="450" y="3988" class="font small">03 配送说明</text>
+    <rect x="554" y="3890" width="110" height="76" rx="8" fill="#E2E8F0"/>
+    <text x="580" y="3988" class="font small">04 售后说明</text>
+    <rect x="696" y="3898" width="86" height="30" rx="8" fill="#F8FAFC" stroke="#CBD5E1"/>
+    <text x="718" y="3918" class="font tiny">设封面</text>
+    <rect x="696" y="3938" width="86" height="30" rx="8" fill="#F8FAFC" stroke="#CBD5E1"/>
+    <text x="718" y="3958" class="font tiny">拖拽排序</text>
+    <rect x="794" y="3938" width="86" height="30" rx="8" fill="#FEF2F2"/>
+    <text x="820" y="3958" class="font tiny" fill="#B91C1C">删除</text>
+
+    <rect x="140" y="4014" width="154" height="38" rx="8" fill="#F8FAFC" stroke="#CBD5E1"/>
+    <text x="170" y="4038" class="font muted">预览小程序</text>
+    <rect x="310" y="4014" width="132" height="38" rx="8" fill="#0F766E"/>
+    <text x="340" y="4038" class="font button">保存详情图</text>
+
+    <rect x="1008" y="3578" width="760" height="496" rx="8" fill="#FFFFFF" stroke="#E2E8F0"/>
+    <text x="1036" y="3620" class="font title">详情图数据结构</text>
+    <text x="1036" y="3648" class="font muted">后端只需要存图片数组、排序、启用状态，不处理复杂排版。</text>
+    <rect x="1036" y="3688" width="700" height="250" rx="8" fill="#0F172A"/>
+    <text x="1064" y="3728" class="font" font-size="13" font-weight="650" fill="#BAE6FD">detailImages: [</text>
+    <text x="1088" y="3762" class="font" font-size="13" font-weight="650" fill="#E2E8F0">{ sort: 1, url: ".../main-selling-point.png", status: "visible" },</text>
+    <text x="1088" y="3796" class="font" font-size="13" font-weight="650" fill="#E2E8F0">{ sort: 2, url: ".../product-detail.png", status: "visible" },</text>
+    <text x="1088" y="3830" class="font" font-size="13" font-weight="650" fill="#E2E8F0">{ sort: 3, url: ".../delivery-guide.png", status: "hidden" }</text>
+    <text x="1064" y="3864" class="font" font-size="13" font-weight="650" fill="#BAE6FD">]</text>
+    <text x="1036" y="3980" class="font h3">前台渲染逻辑</text>
+    <text x="1036" y="4010" class="font body">小程序详情页只需要 v-for 渲染 detailImages，并用 image mode="widthFix" 保持宽度自适应。</text>
+
+    <rect x="1804" y="3578" width="470" height="496" rx="8" fill="#FFFFFF" stroke="#E2E8F0"/>
+    <text x="1832" y="3620" class="font title">小程序详情页预览</text>
+    <rect x="1910" y="3654" width="240" height="388" rx="30" fill="#0F172A"/>
+    <rect x="1924" y="3672" width="212" height="352" rx="24" fill="#FFFFFF"/>
+    <text x="1950" y="3714" class="font h3">西凤酒</text>
+    <text x="1950" y="3738" class="font small">商品详情预览</text>
+    <rect x="1950" y="3762" width="160" height="70" rx="8" fill="#E2E8F0"/>
+    <text x="1994" y="3804" class="font small">商品主图</text>
+    <rect x="1950" y="3850" width="160" height="52" rx="6" fill="#F8FAFC"/>
+    <text x="1970" y="3882" class="font small">商品简介组件</text>
+    <rect x="1950" y="3920" width="160" height="78" rx="6" fill="#FEF3C7"/>
+    <text x="1978" y="3964" class="font small">AI 详情图 01</text>
+    <rect x="1950" y="4008" width="160" height="12" rx="6" fill="#F1F5F9"/>
+
+    <rect x="2310" y="3578" width="698" height="496" rx="8" fill="#FFFFFF" stroke="#E2E8F0"/>
+    <text x="2338" y="3620" class="font title">AI 详情图工作流</text>
+    <rect x="2338" y="3662" width="620" height="60" rx="8" fill="#F8FAFC"/>
+    <text x="2362" y="3698" class="font body">1. 后台填写商品基础信息、卖点、规格、配送说明</text>
+    <rect x="2338" y="3740" width="620" height="60" rx="8" fill="#F8FAFC"/>
+    <text x="2362" y="3776" class="font body">2. 使用 AI 生成详情页长图或分段详情图</text>
+    <rect x="2338" y="3818" width="620" height="60" rx="8" fill="#F8FAFC"/>
+    <text x="2362" y="3854" class="font body">3. 上传到商品详情图，拖拽排序并预览小程序效果</text>
+    <rect x="2338" y="3896" width="620" height="60" rx="8" fill="#F8FAFC"/>
+    <text x="2362" y="3932" class="font body">4. 保存后小程序详情页直接按图片顺序展示</text>
+    <rect x="2338" y="3990" width="620" height="52" rx="8" fill="#ECFDF5"/>
+    <text x="2362" y="4022" class="font body">优点：排版稳定、前端实现简单、后端字段清晰、适合商品营销详情页。</text>
+  </g>
+</svg>
