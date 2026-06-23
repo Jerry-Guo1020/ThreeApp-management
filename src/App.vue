@@ -1,3 +1,3 @@
 <template>
-  <main class="blank-app"></main>
+  <RouterView />
 </template>
