@@ -37,7 +37,7 @@ const routes = [
         path: 'updates',
         name: 'product-updates',
         component: () => import('@/views/ProductUpdates/index.vue'),
-        meta: { title: '商品更新', description: '管理商品详情页、热销榜和场景页的更新动态。' },
+        meta: { title: '商品更新', description: '维护首页轮播通知、上新提醒和展示消息。' },
       },
       {
         path: 'comments/:type(wine|specialty)',
@@ -57,14 +57,14 @@ const routes = [
         path: 'questions',
         name: 'questions',
         component: () => import('@/views/QuestionManagement/index.vue'),
-        meta: { title: '问答管理', description: '集中处理用户咨询、商品问题和待回复内容。' },
+        meta: { title: '问答管理', description: '集中处理用户咨询、业务反馈和待回复内容。' },
       },
       {
         path: 'questions/:id',
         name: 'question-detail',
         component: () => import('@/views/QuestionManagement/QuestionDetail.vue'),
         props: true,
-        meta: { title: '问答详情', description: '查看问答上下文并提交商家回复。' },
+        meta: { title: '问答详情', description: '查看业务反馈详情并提交后台回复。' },
       },
       {
         path: 'content/banner',
@@ -101,10 +101,6 @@ const routes = [
         name: 'settings',
         component: () => import('@/views/Settings/index.vue'),
         meta: { title: '系统设置', description: '管理员维护用户账号、角色权限和可用状态。' },
-      },
-      {
-        path: 'design-review',
-        redirect: '/dashboard',
       },
     ],
   },

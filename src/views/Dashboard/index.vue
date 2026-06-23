@@ -1,17 +1,18 @@
 <script setup lang="ts">
-import { ArrowUpRight, BadgeHelp, Bell, BottleWine, Image, MessageSquareText, PackageCheck } from '@lucide/vue'
+import { ArrowUpRight, BadgeHelp, Bell, BottleWine, Clock3, Image, MessageSquareText, PackageCheck } from '@lucide/vue'
 import { computed } from 'vue'
 
 import StatusBadge from '@/components/common/StatusBadge.vue'
-import { dashboardMetrics, updates } from '@/data/mockData'
+import { businessTypeLabels, dashboardMetrics } from '@/data/mockData'
 import { getStoredProductsByType } from '@/stores/products'
 import { questionState } from '@/stores/questions'
+import { getVisibleStoredUpdates, updateState } from '@/stores/updates'
 
-const wineProducts = computed(() => getStoredProductsByType('wine'))
-const specialtyProducts = computed(() => getStoredProductsByType('specialty'))
+const wineProducts = computed(() => getStoredProductsByType('wine').slice(0, 3))
+const specialtyProducts = computed(() => getStoredProductsByType('specialty').slice(0, 3))
 const pendingQuestions = computed(() => questionState.value.filter((question) => question.status === 'pending'))
+const latestUpdates = computed(() => getVisibleStoredUpdates())
 
-const componentNotes = ['layout: flex h-screen', 'sidebar: w-64 border-r', 'card: rounded-lg border', 'table: divide-y']
 const liveMetrics = computed(() =>
   dashboardMetrics.map((metric) => {
     if (metric.label === '待回复问答') {
@@ -23,6 +24,15 @@ const liveMetrics = computed(() =>
       }
     }
 
+    if (metric.label === '商品更新') {
+      const visibleCount = latestUpdates.value.length
+      return {
+        ...metric,
+        value: String(updateState.value.length).padStart(2, '0'),
+        hint: `当前展示 ${visibleCount} / 3 条`,
+      }
+    }
+
     return metric
   }),
 )
@@ -30,7 +40,7 @@ const liveMetrics = computed(() =>
 
 <template>
   <div class="space-y-6">
-    <section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    <section class="grid gap-4 sm:grid-cols-2 2xl:grid-cols-4">
       <article v-for="metric in liveMetrics" :key="metric.label" class="card p-5">
         <div class="flex items-start justify-between gap-4">
           <div>
@@ -48,91 +58,117 @@ const liveMetrics = computed(() =>
       </article>
     </section>
 
-    <section class="grid gap-6 xl:grid-cols-[minmax(0,1.5fr)_minmax(360px,0.8fr)]">
-      <div class="card p-5">
-        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h2 class="text-lg font-extrabold text-slate-950">Tailwind 组件约定</h2>
-            <p class="mt-1 text-sm leading-6 text-slate-500">后台页面统一使用白底、细边框、圆角和可复用工具栏结构。</p>
-          </div>
-          <div class="rounded-lg bg-slate-50 px-3 py-2 text-sm font-bold text-slate-500 ring-1 ring-slate-200">按页面逐项维护内容</div>
-        </div>
-        <div class="mt-5 flex flex-wrap gap-3">
-          <span v-for="note in componentNotes" :key="note" class="rounded-lg bg-slate-100 px-3 py-2 text-xs font-extrabold text-slate-600">
-            {{ note }}
-          </span>
-        </div>
-        <p class="mt-6 text-sm leading-7 text-slate-600">
-          后续前端实现直接按 Tailwind CSS class 写：bg-slate-50、bg-white、text-slate-900、border-slate-200、rounded-lg、shadow-sm。
-        </p>
-
-        <div class="mt-6 grid gap-4 lg:grid-cols-2">
-          <article class="rounded-lg border border-slate-200 bg-slate-50 p-4">
-            <div class="mb-4 flex items-center gap-2">
-              <BottleWine class="size-5 text-teal-700" />
-              <h3 class="font-extrabold text-slate-950">酒水商品</h3>
-            </div>
-            <div class="space-y-3">
-              <div v-for="product in wineProducts" :key="product.id" class="flex items-center gap-3 rounded-lg bg-white p-3 ring-1 ring-slate-200">
-                <div class="size-12 rounded-lg bg-gradient-to-br" :class="product.imageTone" />
-                <div class="min-w-0 flex-1">
-                  <p class="truncate text-sm font-extrabold text-slate-900">{{ product.name }}</p>
-                  <p class="truncate text-xs text-slate-500">{{ product.subtitle }}</p>
-                </div>
-                <StatusBadge :status="product.status" />
-              </div>
-            </div>
-          </article>
-
-          <article class="rounded-lg border border-slate-200 bg-slate-50 p-4">
-            <div class="mb-4 flex items-center gap-2">
-              <PackageCheck class="size-5 text-teal-700" />
-              <h3 class="font-extrabold text-slate-950">特产商品</h3>
-            </div>
-            <div class="space-y-3">
-              <div v-for="product in specialtyProducts" :key="product.id" class="flex items-center gap-3 rounded-lg bg-white p-3 ring-1 ring-slate-200">
-                <div class="size-12 rounded-lg bg-gradient-to-br" :class="product.imageTone" />
-                <div class="min-w-0 flex-1">
-                  <p class="truncate text-sm font-extrabold text-slate-900">{{ product.name }}</p>
-                  <p class="truncate text-xs text-slate-500">{{ product.subtitle }}</p>
-                </div>
-                <StatusBadge :status="product.status" />
-              </div>
-            </div>
-          </article>
-        </div>
-      </div>
-
-      <aside class="space-y-6">
+    <section class="grid gap-6 2xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
+      <div class="space-y-6">
         <section class="card p-5">
-          <div class="mb-4 flex items-center justify-between">
-            <h2 class="text-lg font-extrabold text-slate-950">近期商品更新</h2>
-            <RouterLink class="text-sm font-extrabold text-teal-700" to="/updates">查看</RouterLink>
+          <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+            <div>
+              <h2 class="text-lg font-extrabold text-slate-950">商品运营概览</h2>
+              <p class="mt-1 text-sm leading-6 text-slate-500">当前酒水和特产商品的上架情况与重点展示内容。</p>
+            </div>
+            <div class="grid grid-cols-2 gap-3 sm:w-auto sm:grid-cols-4">
+              <div class="rounded-lg bg-slate-50 px-4 py-3 text-center ring-1 ring-slate-200">
+                <p class="text-xl font-black text-slate-950">{{ wineProducts.length }}</p>
+                <p class="mt-1 text-xs font-bold text-slate-500">酒水在售</p>
+              </div>
+              <div class="rounded-lg bg-slate-50 px-4 py-3 text-center ring-1 ring-slate-200">
+                <p class="text-xl font-black text-slate-950">{{ specialtyProducts.length }}</p>
+                <p class="mt-1 text-xs font-bold text-slate-500">特产在售</p>
+              </div>
+              <div class="rounded-lg bg-slate-50 px-4 py-3 text-center ring-1 ring-slate-200">
+                <p class="text-xl font-black text-slate-950">{{ latestUpdates.length }}</p>
+                <p class="mt-1 text-xs font-bold text-slate-500">消息轮播</p>
+              </div>
+              <div class="rounded-lg bg-slate-50 px-4 py-3 text-center ring-1 ring-slate-200">
+                <p class="text-xl font-black text-slate-950">{{ pendingQuestions.length }}</p>
+                <p class="mt-1 text-xs font-bold text-slate-500">待处理反馈</p>
+              </div>
+            </div>
           </div>
-          <div class="space-y-3">
-            <article v-for="update in updates.slice(0, 3)" :key="update.id" class="rounded-lg bg-slate-50 p-3">
-              <p class="text-sm font-extrabold text-slate-900">{{ update.title }}</p>
-              <p class="mt-1 text-xs text-slate-500">{{ update.placement }} · {{ update.date }}</p>
+
+          <div class="mt-6 grid gap-4 xl:grid-cols-2">
+            <article class="rounded-lg border border-slate-200 bg-slate-50 p-4">
+              <div class="mb-4 flex items-center gap-2">
+                <BottleWine class="size-5 text-teal-700" />
+                <h3 class="font-extrabold text-slate-950">酒水商品</h3>
+              </div>
+              <div class="space-y-3">
+                <div v-for="product in wineProducts" :key="product.id" class="flex items-center gap-3 rounded-lg bg-white p-3 ring-1 ring-slate-200">
+                  <div class="size-12 rounded-lg bg-gradient-to-br" :class="product.imageTone" />
+                  <div class="min-w-0 flex-1">
+                    <p class="truncate text-sm font-extrabold text-slate-900">{{ product.name }}</p>
+                    <p class="truncate text-xs text-slate-500">{{ product.subtitle }}</p>
+                  </div>
+                  <StatusBadge :status="product.status" />
+                </div>
+              </div>
+            </article>
+
+            <article class="rounded-lg border border-slate-200 bg-slate-50 p-4">
+              <div class="mb-4 flex items-center gap-2">
+                <PackageCheck class="size-5 text-teal-700" />
+                <h3 class="font-extrabold text-slate-950">特产商品</h3>
+              </div>
+              <div class="space-y-3">
+                <div v-for="product in specialtyProducts" :key="product.id" class="flex items-center gap-3 rounded-lg bg-white p-3 ring-1 ring-slate-200">
+                  <div class="size-12 rounded-lg bg-gradient-to-br" :class="product.imageTone" />
+                  <div class="min-w-0 flex-1">
+                    <p class="truncate text-sm font-extrabold text-slate-900">{{ product.name }}</p>
+                    <p class="truncate text-xs text-slate-500">{{ product.subtitle }}</p>
+                  </div>
+                  <StatusBadge :status="product.status" />
+                </div>
+              </div>
             </article>
           </div>
         </section>
 
         <section class="card p-5">
           <div class="mb-4 flex items-center justify-between">
-            <h2 class="text-lg font-extrabold text-slate-950">待处理问答</h2>
+            <h2 class="text-lg font-extrabold text-slate-950">首页轮播通知</h2>
+            <RouterLink class="text-sm font-extrabold text-teal-700" to="/updates">查看全部</RouterLink>
+          </div>
+          <div class="space-y-3">
+            <article v-for="update in latestUpdates" :key="update.id" class="rounded-lg bg-slate-50 p-4 ring-1 ring-slate-200">
+              <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div class="min-w-0">
+                  <p class="truncate text-sm font-extrabold text-slate-900">{{ update.title }}</p>
+                  <p class="mt-1 text-xs text-slate-500">{{ update.placement }} · {{ update.date }} · {{ update.author }}</p>
+                </div>
+                <StatusBadge :status="update.status" />
+              </div>
+            </article>
+          </div>
+        </section>
+      </div>
+
+      <aside class="space-y-6">
+        <section class="card p-5">
+          <div class="mb-4 flex items-center justify-between">
+            <h2 class="text-lg font-extrabold text-slate-950">待处理业务反馈</h2>
             <BadgeHelp class="size-5 text-teal-700" />
           </div>
           <div class="space-y-3">
             <RouterLink
               v-for="question in pendingQuestions"
               :key="question.id"
-              class="group block rounded-lg bg-slate-50 p-3 transition hover:bg-teal-50"
+              class="group block rounded-lg bg-slate-50 p-4 transition hover:bg-teal-50"
               :to="`/questions/${question.id}`"
             >
               <div class="flex items-start justify-between gap-3">
-                <div class="min-w-0">
-                  <p class="truncate text-sm font-extrabold text-slate-900">{{ question.productName }}</p>
-                  <p class="mt-1 line-clamp-2 text-xs leading-5 text-slate-500">{{ question.question }}</p>
+                <div class="min-w-0 flex-1">
+                  <div class="flex flex-wrap items-center gap-2">
+                    <span class="rounded-full bg-white px-2.5 py-1 text-xs font-extrabold text-slate-500 ring-1 ring-slate-200">
+                      {{ businessTypeLabels[question.businessType] }}
+                    </span>
+                    <StatusBadge status="pending" label="待回复" />
+                  </div>
+                  <p class="mt-3 truncate text-sm font-extrabold text-slate-900">{{ question.subject }}</p>
+                  <p class="mt-1 line-clamp-2 text-xs leading-5 text-slate-500">{{ question.content }}</p>
+                  <div class="mt-3 flex items-center gap-2 text-xs font-bold text-slate-400">
+                    <Clock3 class="size-3.5" />
+                    {{ question.contactName }} · {{ question.createdAt }}
+                  </div>
                 </div>
                 <ArrowUpRight class="size-4 shrink-0 text-slate-400 group-hover:text-teal-700" />
               </div>

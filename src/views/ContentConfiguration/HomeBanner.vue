@@ -1,89 +1,99 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { Plus, Save, Upload } from '@lucide/vue'
+import { computed, ref } from 'vue'
+import { ArrowDown, ArrowUp, Pencil } from '@lucide/vue'
 
+import AppToast from '@/components/common/AppToast.vue'
 import PageToolbar from '@/components/common/PageToolbar.vue'
 import StatusBadge from '@/components/common/StatusBadge.vue'
-import UploadGrid from '@/components/common/UploadGrid.vue'
-import { homeBanners } from '@/data/mockData'
+import BannerEditModal from '@/components/content/BannerEditModal.vue'
+import type { ContentCard } from '@/data/mockData'
+import { getStoredBanners, moveStoredBanner, saveStoredBanner } from '@/stores/banners'
 
 const editOpen = ref(false)
+const activeBannerId = ref<string | null>(null)
+const toastOpen = ref(false)
+const toastTone = ref<'success' | 'error'>('success')
+const toastTitle = ref('')
+const toastMessage = ref('')
+
+const banners = computed(() => getStoredBanners())
+const activeBanner = computed<ContentCard | null>(() => banners.value.find((item) => item.id === activeBannerId.value) ?? null)
+
+function openToast(tone: 'success' | 'error', title: string, message: string) {
+  toastTone.value = tone
+  toastTitle.value = title
+  toastMessage.value = message
+  toastOpen.value = true
+}
+
+function openEditor(bannerId: string) {
+  activeBannerId.value = bannerId
+  editOpen.value = true
+}
+
+function closeEditor() {
+  activeBannerId.value = null
+  editOpen.value = false
+}
+
+function move(bannerId: string, direction: 'up' | 'down') {
+  moveStoredBanner(bannerId, direction)
+}
+
+function handleSave(payload: Parameters<typeof saveStoredBanner>[0]) {
+  const result = saveStoredBanner(payload)
+  openToast(result.ok ? 'success' : 'error', result.ok ? '保存成功' : '保存失败', result.message)
+  if (result.ok) {
+    closeEditor()
+  }
+}
 </script>
 
 <template>
   <div class="space-y-6">
-    <PageToolbar title="首页 Banner 配置" description="3 张图 · 支持排序、上下架、跳转商品或页面。" search-placeholder="搜索 Banner">
-      <template #actions>
-        <button class="btn-primary shrink-0" type="button" @click="editOpen = true">
-          <Plus class="size-4" />
-          新增 Banner
-        </button>
-      </template>
-    </PageToolbar>
+    <PageToolbar title="首页 Banner 配置" description="固定 3 张轮播图，按顺序控制封面、标题和小标题展示。" :show-search="false" :show-filter="false" />
 
-    <section class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_420px]">
-      <div class="card p-5">
-        <div class="space-y-3">
-          <article v-for="banner in homeBanners" :key="banner.id" class="rounded-lg bg-slate-50 p-4 ring-1 ring-slate-200">
-            <div class="flex flex-col gap-4 md:flex-row md:items-center">
-              <div class="h-24 w-full rounded-lg bg-gradient-to-br from-teal-100 to-sky-200 md:w-44" />
-              <div class="min-w-0 flex-1">
-                <div class="flex flex-wrap items-center gap-2">
-                  <span class="text-xs font-black text-slate-400">{{ String(banner.sort).padStart(2, '0') }}</span>
-                  <h2 class="font-extrabold text-slate-950">{{ banner.title }}</h2>
-                  <StatusBadge :status="banner.status" />
-                </div>
-                <p class="mt-2 text-sm leading-6 text-slate-500">{{ banner.description }}</p>
-                <p class="mt-2 text-sm font-bold text-slate-700">跳转：{{ banner.target }}</p>
+    <section class="card p-5">
+      <p class="mb-5 text-sm leading-6 text-slate-500">首页会按当前顺序轮播这 3 张图片，直接在这里调整顺序和内容即可。</p>
+
+      <div class="space-y-3">
+        <article v-for="(banner, index) in banners" :key="banner.id" class="rounded-lg bg-slate-50 p-4 ring-1 ring-slate-200">
+          <div class="flex flex-col gap-4 md:flex-row md:items-center">
+            <div class="h-24 w-full rounded-lg bg-gradient-to-br from-teal-100 to-sky-200 md:w-44" />
+
+            <div class="min-w-0 flex-1">
+              <div class="flex flex-wrap items-center gap-2">
+                <span class="rounded-full bg-white px-2.5 py-1 text-xs font-extrabold text-slate-500 ring-1 ring-slate-200">
+                  第 {{ banner.sort }} 张
+                </span>
+                <StatusBadge :status="banner.status" />
               </div>
-              <button class="btn-secondary shrink-0" type="button" @click="editOpen = true">编辑</button>
+              <h2 class="mt-3 text-base font-extrabold text-slate-950">{{ banner.title }}</h2>
+              <p class="mt-2 text-sm leading-6 text-slate-500">{{ banner.description }}</p>
+              <p class="mt-2 text-xs text-slate-400">封面：{{ banner.imageName }}</p>
+              <p class="mt-1 text-xs text-slate-400">对应页面：{{ banner.target }}</p>
             </div>
-          </article>
-        </div>
-      </div>
 
-      <aside class="card p-5">
-        <h2 class="text-lg font-extrabold text-slate-950">内容配置编辑弹窗</h2>
-        <p class="mt-1 text-sm leading-6 text-slate-500">同一个 Modal/Drawer 结构承载 Banner、排序、上下架和跳转绑定。</p>
-        <div class="mt-5 space-y-4 rounded-lg bg-slate-50 p-4">
-          <input class="input-field" value="岭南风味 · 地道特产" />
-          <select class="input-field">
-            <option>商品 / 分类 / 页面</option>
-          </select>
-          <div class="grid grid-cols-2 gap-3">
-            <input class="input-field" value="03" />
-            <button class="rounded-lg bg-teal-50 px-3 py-2 text-sm font-extrabold text-teal-700 ring-1 ring-teal-200" type="button">上架</button>
+            <div class="flex flex-wrap gap-2 md:w-auto">
+              <button class="btn-secondary h-9 min-h-9 px-3 text-xs sm:w-auto" type="button" :disabled="index === 0" @click="move(banner.id, 'up')">
+                <ArrowUp class="size-4" />
+                上移
+              </button>
+              <button class="btn-secondary h-9 min-h-9 px-3 text-xs sm:w-auto" type="button" :disabled="index === banners.length - 1" @click="move(banner.id, 'down')">
+                <ArrowDown class="size-4" />
+                下移
+              </button>
+              <button class="btn-secondary h-9 min-h-9 px-3 text-xs sm:w-auto" type="button" @click="openEditor(banner.id)">
+                <Pencil class="size-4" />
+                编辑
+              </button>
+            </div>
           </div>
-          <UploadGrid compact title="上传 Banner 图片" hint="建议 1500 x 640" />
-        </div>
-      </aside>
+        </article>
+      </div>
     </section>
 
-    <div v-if="editOpen" class="fixed inset-0 z-50 grid place-items-center bg-slate-950/35 p-4" @click.self="editOpen = false">
-      <section class="w-full max-w-2xl rounded-lg bg-white shadow-2xl">
-        <header class="border-b border-slate-200 px-5 py-4">
-          <h2 class="text-lg font-extrabold text-slate-950">编辑 Banner</h2>
-          <p class="mt-1 text-sm text-slate-500">配置图片、跳转目标、排序和上下架状态。</p>
-        </header>
-        <div class="space-y-4 p-5">
-          <div class="grid gap-4 md:grid-cols-3">
-            <input class="input-field md:col-span-2" value="岭南风味 · 地道特产" />
-            <input class="input-field" value="03" />
-          </div>
-          <UploadGrid title="上传 Banner 图片" hint="支持拖拽上传和素材库选择" />
-        </div>
-        <footer class="flex justify-end gap-3 border-t border-slate-200 p-5">
-          <button class="btn-secondary" type="button" @click="editOpen = false">取消</button>
-          <button class="btn-primary" type="button" @click="editOpen = false">
-            <Save class="size-4" />
-            保存配置
-          </button>
-          <button class="btn-secondary" type="button">
-            <Upload class="size-4" />
-            选素材
-          </button>
-        </footer>
-      </section>
-    </div>
+    <BannerEditModal :open="editOpen" :banner="activeBanner" @close="closeEditor" @save="handleSave" />
+    <AppToast :open="toastOpen" :tone="toastTone" :title="toastTitle" :message="toastMessage" @close="toastOpen = false" />
   </div>
 </template>

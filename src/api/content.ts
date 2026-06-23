@@ -1,5 +1,5 @@
-import { updates } from '@/data/mockData'
+import { getVisibleStoredUpdates } from '@/stores/updates'
 
 export function getProductUpdates() {
-  return updates
+  return getVisibleStoredUpdates()
 }

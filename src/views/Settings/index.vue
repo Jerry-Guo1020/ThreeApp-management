@@ -109,7 +109,7 @@ function removeUser(userId: string) {
   <div class="space-y-6">
     <PageToolbar title="系统设置" description="管理员维护用户账号、角色权限和可用状态。" :show-search="false" :show-filter="false">
       <template #actions>
-        <button class="btn-primary shrink-0" type="button" :disabled="!canManageUsers" @click="createOpen = true">
+        <button class="btn-primary shrink-0 sm:w-auto" type="button" :disabled="!canManageUsers" @click="createOpen = true">
           <UserPlus class="size-4" />
           新增用户
         </button>
@@ -201,9 +201,9 @@ function removeUser(userId: string) {
             </select>
           </label>
         </div>
-        <footer class="flex justify-end gap-3 border-t border-slate-200 p-5">
-          <button class="btn-secondary" type="button" @click="createOpen = false">取消</button>
-          <button class="btn-primary" type="button" @click="addUser">
+        <footer class="flex flex-col gap-3 border-t border-slate-200 p-5 sm:flex-row sm:justify-end">
+          <button class="btn-secondary sm:w-auto" type="button" @click="createOpen = false">取消</button>
+          <button class="btn-primary sm:w-auto" type="button" @click="addUser">
             <UserPlus class="size-4" />
             确认新增
           </button>

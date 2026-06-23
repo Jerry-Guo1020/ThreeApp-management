@@ -113,6 +113,16 @@ button {
   transition: border-color 150ms ease, box-shadow 150ms ease, background 150ms ease;
 }
 
+.input-field.has-leading-icon {
+  padding-left: 2.5rem;
+}
+
+.input-field::placeholder,
+textarea::placeholder,
+select:invalid {
+  color: #94a3b8;
+}
+
 .input-field:focus {
   border-color: #0f766e;
   background: #ffffff;
@@ -136,4 +146,15 @@ button {
   color: #0f766e;
   border-color: #99f6e4;
   background: #f0fdfa;
+}
+
+@media (max-width: 767px) {
+  .app-surface {
+    background-size: 28px 28px;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    width: 100%;
+  }
 }

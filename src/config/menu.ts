@@ -1,6 +1,5 @@
 import type { FunctionalComponent } from 'vue'
 import {
-  Archive,
   BadgeHelp,
   Bell,
   BottleWine,
@@ -36,7 +35,7 @@ export const menuGroups: MenuGroup[] = [
       { label: '工作台', path: '/dashboard', icon: LayoutDashboard },
       { label: '酒水商品', path: '/products/wine', icon: BottleWine },
       { label: '特产商品', path: '/products/specialty', icon: PackageCheck },
-      { label: '商品更新', path: '/updates', icon: Bell, badge: '9' },
+      { label: '商品更新', path: '/updates', icon: Bell, badge: '轮播' },
       { label: '评论管理', path: '/comments/wine', icon: MessageSquareText },
       { label: '问答管理', path: '/questions', icon: BadgeHelp },
     ],
@@ -55,7 +54,6 @@ export const menuGroups: MenuGroup[] = [
     items: [
       { label: '素材管理', path: '/materials', icon: Image },
       { label: '系统设置', path: '/settings', icon: Settings },
-      { label: '设计稿归档', path: '/design-review', icon: Archive },
     ],
   },
 ]

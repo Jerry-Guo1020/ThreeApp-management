@@ -43,7 +43,7 @@ async function submit() {
               <span class="mb-2 block text-sm font-bold text-slate-700">账号</span>
               <span class="relative block">
                 <Mail class="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
-                <input v-model="account" class="input-field pl-10" />
+                <input v-model="account" class="input-field has-leading-icon" />
               </span>
             </label>
 
@@ -51,7 +51,7 @@ async function submit() {
               <span class="mb-2 block text-sm font-bold text-slate-700">密码</span>
               <span class="relative block">
                 <KeyRound class="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
-                <input v-model="password" class="input-field pl-10" type="password" />
+                <input v-model="password" class="input-field has-leading-icon" type="password" />
               </span>
             </label>
 

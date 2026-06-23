@@ -31,7 +31,7 @@ const title = computed(() => `${props.product ? '编辑' : '新增'}${productTyp
       <header class="flex min-h-16 items-center justify-between border-b border-slate-200 px-5">
         <div>
           <h2 class="text-lg font-extrabold text-slate-950">{{ title }}</h2>
-          <p class="text-xs text-slate-500">右侧抽屉表单 · 字段按商品类型分开维护</p>
+          <p class="text-xs text-slate-500">维护商品基础资料、展示信息和图片内容。</p>
         </div>
         <button class="icon-button" type="button" aria-label="关闭" @click="emit('close')">
           <X class="size-5" />
@@ -87,9 +87,9 @@ const title = computed(() => `${props.product ? '编辑' : '新增'}${productTyp
         </section>
       </div>
 
-      <footer class="flex justify-end gap-3 border-t border-slate-200 p-5">
-        <button class="btn-secondary" type="button" @click="emit('close')">取消</button>
-        <button class="btn-primary" type="button" @click="emit('close')">
+      <footer class="flex flex-col gap-3 border-t border-slate-200 p-5 sm:flex-row sm:justify-end">
+        <button class="btn-secondary sm:w-auto" type="button" @click="emit('close')">取消</button>
+        <button class="btn-primary sm:w-auto" type="button" @click="emit('close')">
           <Save class="size-4" />
           保存
         </button>

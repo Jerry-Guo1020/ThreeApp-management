@@ -1,6 +1,7 @@
 export type ProductType = 'wine' | 'specialty'
 export type PublishStatus = 'published' | 'draft' | 'scheduled' | 'hidden'
 export type UserRole = 'admin' | 'editor'
+export type BusinessType = 'wine' | 'specialty' | 'cold-storage'
 
 export interface Product {
   id: string
@@ -33,10 +34,13 @@ export interface ProductUpdate {
   type: ProductType
   productId: string
   title: string
+  description: string
   placement: string
   status: PublishStatus
   date: string
   author: string
+  sort: number
+  scheduledAt?: string
 }
 
 export interface CommentSummary {
@@ -64,11 +68,12 @@ export interface CommentItem {
 
 export interface QuestionItem {
   id: string
-  productName: string
-  user: string
-  question: string
+  businessType: BusinessType
+  subject: string
+  contactName: string
+  contactPhone: string
+  content: string
   status: 'pending' | 'replied'
-  type: ProductType
   createdAt: string
   reply?: string
 }
@@ -80,6 +85,7 @@ export interface ContentCard {
   status: PublishStatus
   sort: number
   target: string
+  imageName?: string
 }
 
 export interface ConfigSection {
@@ -118,6 +124,12 @@ export const statusLabels: Record<PublishStatus, string> = {
 export const productTypeLabels: Record<ProductType, string> = {
   wine: '酒水',
   specialty: '特产',
+}
+
+export const businessTypeLabels: Record<BusinessType, string> = {
+  wine: '酒水业务',
+  specialty: '特产业务',
+  'cold-storage': '冷库业务',
 }
 
 export const roleLabels: Record<UserRole, string> = {
@@ -254,41 +266,50 @@ export const updates: ProductUpdate[] = [
     id: 'update-1',
     type: 'wine',
     productId: 'wine-xifeng',
-    title: '西凤酒：礼盒图片更新',
-    placement: '展示于商品详情',
+    title: '首页通知：西凤酒礼盒图已更新',
+    description: '首页轮播提示用户西凤酒礼盒图片已换新，适合近期送礼场景。',
+    placement: '首页消息轮播',
     status: 'published',
-    date: '2026-06-22',
+    date: '2026-06-22 09:30',
     author: '运营小周',
+    sort: 1,
   },
   {
     id: 'update-2',
     type: 'wine',
     productId: 'wine-bourbon-xo',
-    title: '波本蓝君邑 XO：补充商务馈赠说明',
-    placement: '展示于酒水页热销榜',
+    title: '首页通知：波本蓝君邑 XO 补充商务礼赠说明',
+    description: '增加商务礼赠场景说明，方便首页轮播中同步告知用户。',
+    placement: '首页消息轮播',
     status: 'draft',
-    date: '2026-06-21',
+    date: '2026-06-21 16:15',
     author: '运营小梁',
+    sort: 2,
   },
   {
     id: 'update-3',
     type: 'wine',
     productId: 'wine-happy-day',
-    title: '福莱好日子：婚宴场景图替换',
-    placement: '展示于选酒场景',
+    title: '首页通知：福莱好日子婚宴场景图替换',
+    description: '准备在婚宴旺季前上线新的场景图，并以文字轮播提醒用户。',
+    placement: '首页消息轮播',
     status: 'scheduled',
-    date: '2026-06-24',
+    date: '2026-06-24 10:00',
     author: '运营小周',
+    sort: 3,
+    scheduledAt: '2026-06-24T10:00',
   },
   {
     id: 'update-4',
     type: 'specialty',
     productId: 'specialty-chicken',
-    title: '清远走地鸡：新增农家产地介绍',
-    placement: '展示于特产详情页',
+    title: '首页通知：清远走地鸡新增农家产地介绍',
+    description: '轮播告知用户特产页已补充农家产地故事与图片展示。',
+    placement: '首页消息轮播',
     status: 'published',
-    date: '2026-06-20',
+    date: '2026-06-20 14:40',
     author: '内容小何',
+    sort: 1,
   },
 ]
 
@@ -370,38 +391,65 @@ export const comments: CommentItem[] = [
 export const questions: QuestionItem[] = [
   {
     id: 'question-1',
-    productName: '西凤酒',
-    user: '林先生',
-    question: '这款酒适合五十岁长辈生日宴吗？有没有礼盒装？',
+    businessType: 'wine',
+    subject: '送礼选酒咨询',
+    contactName: '孙先生',
+    contactPhone: '138****2301',
+    content: '我想咨询一下长辈生日宴用酒，想看礼盒装和价位推荐。',
     status: 'pending',
-    type: 'wine',
     createdAt: '2026-06-22 14:20',
   },
   {
     id: 'question-2',
-    productName: '清远走地鸡',
-    user: '陈女士',
-    question: '配送到深圳大概多久，是否可以指定周末送达？',
+    businessType: 'specialty',
+    subject: '特产配送时效',
+    contactName: '黄先生',
+    contactPhone: '136****7752',
+    content: '清远走地鸡配送到深圳大概多久，是否可以安排周末送达？',
     status: 'pending',
-    type: 'specialty',
     createdAt: '2026-06-22 10:08',
   },
   {
     id: 'question-3',
-    productName: '波本蓝君邑 XO',
-    user: '采购小唐',
-    question: '一次订 20 盒是否可以定制贺卡？',
+    businessType: 'cold-storage',
+    subject: '冷库安装需求',
+    contactName: '赵小姐',
+    contactPhone: '139****4920',
+    content: '门店准备新增一个小型冷库，想了解大概周期、报价和后期维保。',
     status: 'replied',
-    type: 'wine',
     createdAt: '2026-06-21 17:42',
-    reply: '支持定制贺卡，请提供订购数量和祝福语，我们会安排。',
+    reply: '已收到您的需求，冷库项目可先按使用面积和温区要求评估，我们会尽快与您联系。',
   },
 ]
 
 export const homeBanners: ContentCard[] = [
-  { id: 'banner-1', title: '主推冷库工程', description: '工程服务首屏入口，强调方案设计和安装交付。', status: 'published', sort: 1, target: '冷库页' },
-  { id: 'banner-2', title: '酒水精选入口', description: '导流热门酒水和场景推荐。', status: 'published', sort: 2, target: '酒水商品' },
-  { id: 'banner-3', title: '岭南特产入口', description: '展示广东地区特产和分类入口。', status: 'draft', sort: 3, target: '特产分类' },
+  {
+    id: 'banner-1',
+    title: '主推冷库工程',
+    description: '工程服务首屏入口，强调方案设计和安装交付。',
+    status: 'published',
+    sort: 1,
+    target: '冷库页',
+    imageName: 'cold-storage-cover.jpg',
+  },
+  {
+    id: 'banner-2',
+    title: '酒水精选入口',
+    description: '导流热门酒水和场景推荐。',
+    status: 'published',
+    sort: 2,
+    target: '酒水商品',
+    imageName: 'wine-banner.jpg',
+  },
+  {
+    id: 'banner-3',
+    title: '岭南特产入口',
+    description: '展示广东地区特产和分类入口。',
+    status: 'draft',
+    sort: 3,
+    target: '特产分类',
+    imageName: 'specialty-banner.jpg',
+  },
 ]
 
 export const contentConfigs: Record<'specialty' | 'wine' | 'coldStorage', ConfigSection> = {
@@ -436,7 +484,7 @@ export const materials: MaterialAsset[] = [
 export const dashboardMetrics = [
   { label: '今日评论', value: '86', hint: '默认前台展示', tone: 'teal' },
   { label: '待回复问答', value: '12', hint: '酒水 7 / 特产 5', tone: 'sky' },
-  { label: '商品更新', value: '09', hint: '本周新增', tone: 'amber' },
+  { label: '商品更新', value: '09', hint: '首页轮播通知', tone: 'amber' },
   { label: '素材待整理', value: '34', hint: '图片资源', tone: 'rose' },
 ]
 

@@ -45,11 +45,11 @@ function handleDrop(targetId: string) {
       :show-filter="false"
     >
       <template #actions>
-        <button class="btn-secondary shrink-0" type="button" @click="showSortGuide = !showSortGuide">
+        <button class="btn-secondary shrink-0 sm:w-auto" type="button" @click="showSortGuide = !showSortGuide">
           <GripVertical class="size-4" />
           {{ showSortGuide ? '收起排序说明' : '查看排序说明' }}
         </button>
-        <button class="btn-primary shrink-0" type="button" @click="openDrawer()">
+        <button class="btn-primary shrink-0 sm:w-auto" type="button" @click="openDrawer()">
           <Plus class="size-4" />
           新增酒水商品
         </button>
@@ -112,7 +112,7 @@ function handleDrop(targetId: string) {
             <td class="px-4 py-4">
               <div class="flex gap-2">
                 <ActionIconButton :icon="Pencil" label="编辑" title="编辑商品资料" @click="openDrawer(product)" />
-                <ActionIconButton :icon="RefreshCw" label="更新" title="查看商品更新记录" @click="activeProduct = product" />
+                <ActionIconButton :icon="RefreshCw" label="通知" title="查看首页轮播通知内容" @click="activeProduct = product" />
                 <RouterLink :to="`/comments/wine/${product.id}`">
                   <ActionIconButton :icon="MessageSquareText" label="评论" title="进入评论管理" />
                 </RouterLink>

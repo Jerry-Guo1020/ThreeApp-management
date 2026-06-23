@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ChevronDown, LogOut, Menu, UserCog, UserRound } from '@lucide/vue'
-import { computed, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 import { currentUser, getCurrentUserRoleLabel, logoutCurrentUser } from '@/stores/user'
@@ -16,6 +16,7 @@ const emit = defineEmits<{
 
 const router = useRouter()
 const menuOpen = ref(false)
+const menuRef = ref<HTMLElement | null>(null)
 const roleLabel = computed(() => getCurrentUserRoleLabel())
 const userName = computed(() => currentUser.value?.name ?? '未登录')
 const userEmail = computed(() => currentUser.value?.email ?? '暂无账号信息')
@@ -24,17 +25,36 @@ function toggleMenu() {
   menuOpen.value = !menuOpen.value
 }
 
+function handleClickOutside(event: MouseEvent) {
+  if (!menuRef.value) return
+  if (menuRef.value.contains(event.target as Node)) return
+  menuOpen.value = false
+}
+
 async function logout() {
   logoutCurrentUser()
   menuOpen.value = false
   await router.push('/login')
 }
+
+onMounted(() => {
+  document.addEventListener('click', handleClickOutside)
+})
+
+onBeforeUnmount(() => {
+  document.removeEventListener('click', handleClickOutside)
+})
 </script>
 
 <template>
   <header class="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur">
     <div class="flex min-h-16 items-center gap-4 px-4 sm:px-6 lg:px-8">
-      <button class="icon-button lg:hidden" type="button" aria-label="打开菜单" @click="emit('menu')">
+      <button
+        class="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition hover:border-teal-200 hover:bg-teal-50 hover:text-teal-700 lg:hidden"
+        type="button"
+        aria-label="打开菜单"
+        @click="emit('menu')"
+      >
         <Menu class="size-5" />
       </button>
 
@@ -43,9 +63,9 @@ async function logout() {
         <p v-if="props.description" class="hidden truncate text-xs text-slate-500 sm:block">{{ props.description }}</p>
       </div>
 
-      <div class="relative">
+      <div ref="menuRef" class="relative">
         <button
-          class="inline-flex h-10 items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-sm font-bold text-slate-700 transition hover:border-teal-200 hover:bg-teal-50 hover:text-teal-700"
+          class="inline-flex h-10 items-center gap-2 rounded-lg bg-white px-3 text-sm font-bold text-slate-700 transition hover:bg-teal-50 hover:text-teal-700"
           type="button"
           @click="toggleMenu"
         >
