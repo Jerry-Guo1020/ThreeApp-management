@@ -1,19 +1,37 @@
 <script setup lang="ts">
-import { ArrowUpRight, BadgeHelp, Bell, BottleWine, Image, MessageSquareText, PackageCheck, Plus } from '@lucide/vue'
+import { ArrowUpRight, BadgeHelp, Bell, BottleWine, Image, MessageSquareText, PackageCheck } from '@lucide/vue'
+import { computed } from 'vue'
 
 import StatusBadge from '@/components/common/StatusBadge.vue'
-import { dashboardMetrics, getProductsByType, questions, updates } from '@/data/mockData'
+import { dashboardMetrics, updates } from '@/data/mockData'
+import { getStoredProductsByType } from '@/stores/products'
+import { questionState } from '@/stores/questions'
 
-const wineProducts = getProductsByType('wine')
-const specialtyProducts = getProductsByType('specialty')
+const wineProducts = computed(() => getStoredProductsByType('wine'))
+const specialtyProducts = computed(() => getStoredProductsByType('specialty'))
+const pendingQuestions = computed(() => questionState.value.filter((question) => question.status === 'pending'))
 
 const componentNotes = ['layout: flex h-screen', 'sidebar: w-64 border-r', 'card: rounded-lg border', 'table: divide-y']
+const liveMetrics = computed(() =>
+  dashboardMetrics.map((metric) => {
+    if (metric.label === '待回复问答') {
+      const pendingCount = pendingQuestions.value.length
+      return {
+        ...metric,
+        value: String(pendingCount).padStart(2, '0'),
+        hint: `当前待回复 ${pendingCount} 条`,
+      }
+    }
+
+    return metric
+  }),
+)
 </script>
 
 <template>
   <div class="space-y-6">
     <section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-      <article v-for="metric in dashboardMetrics" :key="metric.label" class="card p-5">
+      <article v-for="metric in liveMetrics" :key="metric.label" class="card p-5">
         <div class="flex items-start justify-between gap-4">
           <div>
             <p class="text-sm font-bold text-slate-500">{{ metric.label }}</p>
@@ -37,10 +55,7 @@ const componentNotes = ['layout: flex h-screen', 'sidebar: w-64 border-r', 'card
             <h2 class="text-lg font-extrabold text-slate-950">Tailwind 组件约定</h2>
             <p class="mt-1 text-sm leading-6 text-slate-500">后台页面统一使用白底、细边框、圆角和可复用工具栏结构。</p>
           </div>
-          <RouterLink class="btn-primary" to="/products/wine">
-            <Plus class="size-4" />
-            新增内容
-          </RouterLink>
+          <div class="rounded-lg bg-slate-50 px-3 py-2 text-sm font-bold text-slate-500 ring-1 ring-slate-200">按页面逐项维护内容</div>
         </div>
         <div class="mt-5 flex flex-wrap gap-3">
           <span v-for="note in componentNotes" :key="note" class="rounded-lg bg-slate-100 px-3 py-2 text-xs font-extrabold text-slate-600">
@@ -109,7 +124,7 @@ const componentNotes = ['layout: flex h-screen', 'sidebar: w-64 border-r', 'card
           </div>
           <div class="space-y-3">
             <RouterLink
-              v-for="question in questions"
+              v-for="question in pendingQuestions"
               :key="question.id"
               class="group block rounded-lg bg-slate-50 p-3 transition hover:bg-teal-50"
               :to="`/questions/${question.id}`"

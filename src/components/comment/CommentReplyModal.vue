@@ -1,13 +1,35 @@
 <script setup lang="ts">
 import { Send, X } from '@lucide/vue'
+import { computed, ref, watch } from 'vue'
+
+import type { CommentItem } from '@/data/mockData'
 
 const props = defineProps<{
   open: boolean
+  comment?: CommentItem | null
 }>()
 
 const emit = defineEmits<{
   close: []
+  submit: [payload: { id: string; reply: string }]
 }>()
+
+const replyText = ref('')
+
+watch(
+  () => props.comment,
+  (comment) => {
+    replyText.value = comment?.reply ?? ''
+  },
+  { immediate: true },
+)
+
+const isEdit = computed(() => Boolean(props.comment?.reply))
+
+function handleSubmit() {
+  if (!props.comment) return
+  emit('submit', { id: props.comment.id, reply: replyText.value.trim() })
+}
 </script>
 
 <template>
@@ -15,8 +37,8 @@ const emit = defineEmits<{
     <section class="w-full max-w-md rounded-lg bg-white shadow-2xl">
       <header class="flex min-h-16 items-center justify-between border-b border-slate-200 px-5">
         <div>
-          <h2 class="text-lg font-extrabold text-slate-950">回复评论</h2>
-          <p class="text-xs text-slate-500">二级评论由后台商家回复产生</p>
+          <h2 class="text-lg font-extrabold text-slate-950">{{ isEdit ? '修改回复' : '回复评论' }}</h2>
+          <p class="text-xs text-slate-500">{{ props.comment?.author }} · {{ props.comment?.createdAt }}</p>
         </div>
         <button class="icon-button" type="button" aria-label="关闭" @click="emit('close')">
           <X class="size-5" />
@@ -24,27 +46,18 @@ const emit = defineEmits<{
       </header>
 
       <div class="space-y-5 p-5">
+        <div class="rounded-lg bg-slate-50 p-4 text-sm leading-6 text-slate-600">
+          {{ props.comment?.content }}
+        </div>
         <div>
           <label class="mb-2 block text-sm font-bold text-slate-700">回复内容</label>
-          <textarea class="input-field min-h-32 resize-none" value="感谢认可，后续会继续优化包装防震。" />
-        </div>
-        <div>
-          <label class="mb-2 block text-sm font-bold text-slate-700">操作</label>
-          <div class="flex flex-wrap gap-2">
-            <button class="rounded-lg bg-white px-3 py-2 text-sm font-bold text-slate-600 ring-1 ring-slate-200" type="button">置顶</button>
-            <button class="rounded-lg bg-white px-3 py-2 text-sm font-bold text-slate-600 ring-1 ring-slate-200" type="button">标记处理</button>
-            <button class="rounded-lg bg-rose-50 px-3 py-2 text-sm font-bold text-rose-700 ring-1 ring-rose-100" type="button">删除评论</button>
-          </div>
-        </div>
-        <div class="rounded-lg bg-rose-50 p-4">
-          <p class="text-sm font-extrabold text-rose-900">删除评论确认</p>
-          <p class="mt-1 text-sm leading-6 text-rose-700">删除后前台不再展示，可保留后台日志。</p>
+          <textarea v-model="replyText" class="input-field min-h-32 resize-none" placeholder="输入商家回复内容" />
         </div>
       </div>
 
       <footer class="flex justify-end gap-3 border-t border-slate-200 p-5">
         <button class="btn-secondary" type="button" @click="emit('close')">取消</button>
-        <button class="btn-primary" type="button" @click="emit('close')">
+        <button class="btn-primary" type="button" @click="handleSubmit">
           <Send class="size-4" />
           提交回复
         </button>

@@ -1,5 +1,5 @@
-import { getCommentsByProduct } from '@/data/mockData'
+import { commentState } from '@/stores/comments'
 
 export function getProductComments(productId: string) {
-  return getCommentsByProduct(productId)
+  return commentState.value.filter((comment) => comment.productId === productId)
 }

@@ -38,7 +38,7 @@ export const menuGroups: MenuGroup[] = [
       { label: '特产商品', path: '/products/specialty', icon: PackageCheck },
       { label: '商品更新', path: '/updates', icon: Bell, badge: '9' },
       { label: '评论管理', path: '/comments/wine', icon: MessageSquareText },
-      { label: '问答管理', path: '/questions', icon: BadgeHelp, badge: '12' },
+      { label: '问答管理', path: '/questions', icon: BadgeHelp },
     ],
   },
   {

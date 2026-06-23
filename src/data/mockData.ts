@@ -1,5 +1,6 @@
 export type ProductType = 'wine' | 'specialty'
 export type PublishStatus = 'published' | 'draft' | 'scheduled' | 'hidden'
+export type UserRole = 'admin' | 'editor'
 
 export interface Product {
   id: string
@@ -57,6 +58,7 @@ export interface CommentItem {
   content: string
   images: number
   pinned: boolean
+  deleted?: boolean
   reply?: string
 }
 
@@ -68,6 +70,7 @@ export interface QuestionItem {
   status: 'pending' | 'replied'
   type: ProductType
   createdAt: string
+  reply?: string
 }
 
 export interface ContentCard {
@@ -95,6 +98,16 @@ export interface MaterialAsset {
   tone: string
 }
 
+export interface UserAccount {
+  id: string
+  name: string
+  email: string
+  password: string
+  role: UserRole
+  status: 'active' | 'disabled'
+  lastLogin: string
+}
+
 export const statusLabels: Record<PublishStatus, string> = {
   published: '上架',
   draft: '草稿',
@@ -105,6 +118,11 @@ export const statusLabels: Record<PublishStatus, string> = {
 export const productTypeLabels: Record<ProductType, string> = {
   wine: '酒水',
   specialty: '特产',
+}
+
+export const roleLabels: Record<UserRole, string> = {
+  admin: '管理员',
+  editor: '普通用户',
 }
 
 export const products: Product[] = [
@@ -337,6 +355,16 @@ export const comments: CommentItem[] = [
     pinned: true,
     reply: '感谢支持，生鲜配送会继续盯紧时效。',
   },
+  {
+    id: 'comment-6',
+    productId: 'wine-bourbon-xo',
+    author: '婚宴采购周周',
+    rating: 3,
+    createdAt: '2026-06-23',
+    content: '外观不错，但我想知道大批量采购是否支持贺卡定制，希望客服尽快回复。',
+    images: 0,
+    pinned: false,
+  },
 ]
 
 export const questions: QuestionItem[] = [
@@ -366,6 +394,7 @@ export const questions: QuestionItem[] = [
     status: 'replied',
     type: 'wine',
     createdAt: '2026-06-21 17:42',
+    reply: '支持定制贺卡，请提供订购数量和祝福语，我们会安排。',
   },
 ]
 
@@ -409,6 +438,36 @@ export const dashboardMetrics = [
   { label: '待回复问答', value: '12', hint: '酒水 7 / 特产 5', tone: 'sky' },
   { label: '商品更新', value: '09', hint: '本周新增', tone: 'amber' },
   { label: '素材待整理', value: '34', hint: '图片资源', tone: 'rose' },
+]
+
+export const userAccounts: UserAccount[] = [
+  {
+    id: 'user-admin',
+    name: '平台管理员',
+    email: 'admin@threeapp.com',
+    password: 'password',
+    role: 'admin',
+    status: 'active',
+    lastLogin: '2026-06-23 08:30',
+  },
+  {
+    id: 'user-ops',
+    name: '运营小周',
+    email: 'ops@threeapp.com',
+    password: 'password',
+    role: 'editor',
+    status: 'active',
+    lastLogin: '2026-06-23 07:56',
+  },
+  {
+    id: 'user-content',
+    name: '内容小何',
+    email: 'content@threeapp.com',
+    password: 'password',
+    role: 'editor',
+    status: 'disabled',
+    lastLogin: '2026-06-18 18:12',
+  },
 ]
 
 export function getProductsByType(type: ProductType) {

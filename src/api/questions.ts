@@ -1,5 +1,5 @@
-import { questions } from '@/data/mockData'
+import { questionState } from '@/stores/questions'
 
 export function getQuestions() {
-  return questions
+  return questionState.value
 }

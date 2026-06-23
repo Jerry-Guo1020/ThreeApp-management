@@ -1,5 +1,5 @@
-import { getProductsByType } from '@/data/mockData'
+import { getStoredProductsByType } from '@/stores/products'
 
 export function getSpecialtyProducts() {
-  return getProductsByType('specialty')
+  return getStoredProductsByType('specialty')
 }

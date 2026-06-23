@@ -4,13 +4,14 @@ import { ArrowUpRight, MessageSquareText } from '@lucide/vue'
 
 import PageToolbar from '@/components/common/PageToolbar.vue'
 import StatusBadge from '@/components/common/StatusBadge.vue'
-import { getCommentSummariesByType, productTypeLabels, type ProductType } from '@/data/mockData'
+import { productTypeLabels, type ProductType } from '@/data/mockData'
+import { getCommentSummariesByTypeFromStore } from '@/stores/comments'
 
 const props = defineProps<{
   type: ProductType
 }>()
 
-const summaries = computed(() => getCommentSummariesByType(props.type))
+const summaries = computed(() => getCommentSummariesByTypeFromStore(props.type))
 const totalComments = computed(() => summaries.value.reduce((sum, item) => sum + item.total, 0))
 </script>
 
@@ -19,7 +20,8 @@ const totalComments = computed(() => summaries.value.reduce((sum, item) => sum +
     <PageToolbar
       title="评论管理入口"
       description="先按商品查看评论概况，进入详情后管理全部评论与二级评论。"
-      search-placeholder="搜索商品评论"
+      :show-search="false"
+      :show-filter="false"
     >
       <template #actions>
         <RouterLink
@@ -60,11 +62,11 @@ const totalComments = computed(() => summaries.value.reduce((sum, item) => sum +
               <div>
                 <h3 class="font-extrabold text-slate-950">{{ summary.productName }}</h3>
                 <p class="mt-1 text-sm text-slate-500">
-                  {{ summary.total }} 条评论 · {{ summary.secondLevel }} 条二级回复 · {{ summary.lastAt }}
+                  {{ summary.total }} 条评论 · {{ summary.secondLevel }} 条已回复 · {{ summary.lastAt }}
                 </p>
               </div>
               <div class="flex items-center gap-3">
-                <StatusBadge v-if="summary.flagged" status="pending" :label="`${summary.flagged} 条标记`" />
+                <StatusBadge v-if="summary.flagged" status="pending" :label="`${summary.flagged} 条待回复`" />
                 <span class="inline-flex items-center gap-1 text-sm font-extrabold text-teal-700">
                   进入评论
                   <ArrowUpRight class="size-4" />
@@ -80,7 +82,7 @@ const totalComments = computed(() => summaries.value.reduce((sum, item) => sum +
         <div class="mt-5 space-y-4 text-sm leading-7 text-slate-600">
           <p>评论默认直接前台展示，不走强审核流程。</p>
           <p>后台主要用于：删除不合适评论、回复用户、置顶优质评论、查看二级评论。</p>
-          <p>如果后续需要敏感词或举报，再补充“标记异常”队列。</p>
+          <p>未回复数量会在入口处直接提示，方便先处理待回复商品。</p>
         </div>
         <div class="mt-6 grid grid-cols-2 gap-3">
           <div class="rounded-lg bg-slate-50 p-4 text-center ring-1 ring-slate-200">

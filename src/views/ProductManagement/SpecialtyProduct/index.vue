@@ -1,33 +1,53 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { Download, Eye, MessageSquareText, Pencil, Plus, RefreshCw } from '@lucide/vue'
+import { Eye, GripVertical, MessageSquareText, Pencil, Plus, RefreshCw } from '@lucide/vue'
 
+import ActionIconButton from '@/components/common/ActionIconButton.vue'
 import DataTable from '@/components/common/DataTable.vue'
 import MiniProgramPreview from '@/components/common/MiniProgramPreview.vue'
 import PageToolbar from '@/components/common/PageToolbar.vue'
 import StatusBadge from '@/components/common/StatusBadge.vue'
 import DetailImageManager from '@/components/product/DetailImageManager.vue'
 import ProductFormDrawer from '@/components/product/ProductFormDrawer.vue'
-import { getProductsByType, type Product } from '@/data/mockData'
+import type { Product } from '@/data/mockData'
+import { getStoredProductsByType, reorderStoredProducts } from '@/stores/products'
 
 const drawerOpen = ref(false)
 const activeProduct = ref<Product | null>(null)
-const products = getProductsByType('specialty')
-const selectedProduct = computed(() => activeProduct.value ?? products[0])
+const showSortGuide = ref(false)
+const draggingId = ref<string | null>(null)
+const products = computed(() => getStoredProductsByType('specialty'))
+const selectedProduct = computed(() => activeProduct.value ?? products.value[0] ?? null)
 
 function openDrawer(product?: Product) {
   activeProduct.value = product ?? null
   drawerOpen.value = true
 }
+
+function handleDragStart(productId: string) {
+  draggingId.value = productId
+}
+
+function handleDrop(targetId: string) {
+  if (!draggingId.value) return
+  const nextProducts = reorderStoredProducts('specialty', draggingId.value, targetId)
+  activeProduct.value = nextProducts.find((product) => product.id === targetId) ?? activeProduct.value
+  draggingId.value = null
+}
 </script>
 
 <template>
   <div class="space-y-6">
-    <PageToolbar title="特产商品" description="特产商品独立维护分类、地区、品牌标签、详情图与小程序预览。" search-placeholder="搜索特产商品">
+    <PageToolbar
+      title="特产商品"
+      description="支持通过拖拽调整小程序特产列表、热销排序和分类入口的前台展示顺位。"
+      :show-search="false"
+      :show-filter="false"
+    >
       <template #actions>
-        <button class="btn-secondary shrink-0" type="button">
-          <Download class="size-4" />
-          导入数据
+        <button class="btn-secondary shrink-0" type="button" @click="showSortGuide = !showSortGuide">
+          <GripVertical class="size-4" />
+          {{ showSortGuide ? '收起排序说明' : '查看排序说明' }}
         </button>
         <button class="btn-primary shrink-0 bg-teal-500 hover:bg-teal-600" type="button" @click="openDrawer()">
           <Plus class="size-4" />
@@ -36,10 +56,39 @@ function openDrawer(product?: Product) {
       </template>
     </PageToolbar>
 
+    <section v-if="showSortGuide" class="card p-4 text-sm leading-7 text-slate-600">
+      按住每一行左侧的拖拽手柄调整特产商品顺序，排序结果可直接对应小程序特产列表、热销榜和分类展示顺位。
+    </section>
+
     <section class="grid gap-6 2xl:grid-cols-[minmax(0,1.4fr)_380px]">
       <div class="space-y-6">
-        <DataTable :columns="['商品', '分类 / 产地', '标签', '评论', '状态', '操作']">
-          <tr v-for="product in products" :key="product.id" class="hover:bg-slate-50">
+        <DataTable :columns="['排序', '商品', '分类 / 产地', '标签', '评论', '状态', '操作']">
+          <tr
+            v-for="product in products"
+            :key="product.id"
+            class="hover:bg-slate-50"
+            :class="draggingId === product.id ? 'opacity-60' : ''"
+            @dragover.prevent
+            @drop.prevent="handleDrop(product.id)"
+          >
+            <td class="px-4 py-4">
+              <div class="flex items-center gap-3">
+                <button
+                  class="inline-flex h-10 items-center gap-2 rounded-lg border border-dashed border-slate-300 bg-slate-50 px-3 text-sm font-bold text-slate-600"
+                  type="button"
+                  draggable="true"
+                  aria-label="拖拽排序"
+                  @dragstart="handleDragStart(product.id)"
+                  @dragend="draggingId = null"
+                >
+                  <GripVertical class="size-4" />
+                  拖拽
+                </button>
+                <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100 text-sm font-black text-slate-700">
+                  {{ String(product.sort).padStart(2, '0') }}
+                </div>
+              </div>
+            </td>
             <td class="min-w-72 px-4 py-4">
               <div class="flex items-center gap-3">
                 <div class="size-14 rounded-lg bg-gradient-to-br" :class="product.imageTone" />
@@ -62,27 +111,21 @@ function openDrawer(product?: Product) {
             <td class="px-4 py-4"><StatusBadge :status="product.status" /></td>
             <td class="px-4 py-4">
               <div class="flex gap-2">
-                <button class="icon-button h-9 w-9" type="button" aria-label="编辑" @click="openDrawer(product)">
-                  <Pencil class="size-4" />
-                </button>
-                <button class="icon-button h-9 w-9" type="button" aria-label="更新" @click="activeProduct = product">
-                  <RefreshCw class="size-4" />
-                </button>
-                <RouterLink class="icon-button h-9 w-9" :to="`/comments/specialty/${product.id}`" aria-label="评论">
-                  <MessageSquareText class="size-4" />
+                <ActionIconButton :icon="Pencil" label="编辑" title="编辑商品资料" @click="openDrawer(product)" />
+                <ActionIconButton :icon="RefreshCw" label="更新" title="查看商品更新记录" @click="activeProduct = product" />
+                <RouterLink :to="`/comments/specialty/${product.id}`">
+                  <ActionIconButton :icon="MessageSquareText" label="评论" title="进入评论管理" />
                 </RouterLink>
-                <button class="icon-button h-9 w-9" type="button" aria-label="预览" @click="activeProduct = product">
-                  <Eye class="size-4" />
-                </button>
+                <ActionIconButton :icon="Eye" label="预览" title="预览小程序效果" @click="activeProduct = product" />
               </div>
             </td>
           </tr>
         </DataTable>
 
-        <DetailImageManager :product="selectedProduct" />
+        <DetailImageManager v-if="selectedProduct" :product="selectedProduct" />
       </div>
 
-      <MiniProgramPreview :product="selectedProduct" />
+      <MiniProgramPreview v-if="selectedProduct" :product="selectedProduct" />
     </section>
 
     <ProductFormDrawer :open="drawerOpen" type="specialty" :product="activeProduct" @close="drawerOpen = false" />

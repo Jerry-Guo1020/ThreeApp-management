@@ -7,11 +7,13 @@ withDefaults(
     description?: string
     searchPlaceholder?: string
     showFilter?: boolean
+    showSearch?: boolean
   }>(),
   {
     description: '',
     searchPlaceholder: '搜索商品、评论、问答',
     showFilter: true,
+    showSearch: true,
   },
 )
 </script>
@@ -27,7 +29,7 @@ withDefaults(
       </div>
 
       <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
-        <label class="relative block min-w-0 sm:w-72">
+        <label v-if="showSearch" class="relative block min-w-0 sm:w-72">
           <Search class="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
           <input class="input-field pl-9" :placeholder="searchPlaceholder" />
         </label>

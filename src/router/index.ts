@@ -1,5 +1,8 @@
 import { createRouter, createWebHistory, type RouteLocationNormalized } from 'vue-router'
 
+import { appState } from '@/stores/app'
+import { currentUser } from '@/stores/user'
+
 const routes = [
   { path: '/', redirect: '/dashboard' },
   {
@@ -97,7 +100,7 @@ const routes = [
         path: 'settings',
         name: 'settings',
         component: () => import('@/views/Settings/index.vue'),
-        meta: { title: '系统设置', description: '维护平台基础资料、权限和发布偏好。' },
+        meta: { title: '系统设置', description: '管理员维护用户账号、角色权限和可用状态。' },
       },
       {
         path: 'design-review',
@@ -110,6 +113,20 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes,
+})
+
+router.beforeEach((to) => {
+  const canEnter = appState.isAuthenticated && Boolean(currentUser.value)
+
+  if (!to.meta.public && !canEnter) {
+    return { path: '/login' }
+  }
+
+  if (to.path === '/login' && canEnter) {
+    return { path: '/dashboard' }
+  }
+
+  return true
 })
 
 export default router

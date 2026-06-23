@@ -1,21 +1,56 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { ArrowLeft, Send } from '@lucide/vue'
 
+import AppToast from '@/components/common/AppToast.vue'
 import PageToolbar from '@/components/common/PageToolbar.vue'
 import StatusBadge from '@/components/common/StatusBadge.vue'
-import { productTypeLabels, questions } from '@/data/mockData'
+import { productTypeLabels } from '@/data/mockData'
+import { getStoredQuestionById, replyToStoredQuestion } from '@/stores/questions'
 
 const props = defineProps<{
   id: string
 }>()
 
-const question = computed(() => questions.find((item) => item.id === props.id))
+const reply = ref('')
+const toastOpen = ref(false)
+const toastTone = ref<'success' | 'error'>('success')
+const toastTitle = ref('')
+const toastMessage = ref('')
+
+const question = computed(() => getStoredQuestionById(props.id))
+
+watch(
+  question,
+  (value) => {
+    reply.value = value?.reply ?? ''
+  },
+  { immediate: true },
+)
+
+function submitReply() {
+  if (!reply.value.trim()) {
+    toastTone.value = 'error'
+    toastTitle.value = '回复失败'
+    toastMessage.value = '请先填写回复内容。'
+    toastOpen.value = true
+    return
+  }
+
+  if (question.value) {
+    replyToStoredQuestion(question.value.id, reply.value.trim())
+  }
+
+  toastTone.value = 'success'
+  toastTitle.value = '回复成功'
+  toastMessage.value = '该问答已标记为已回复，可回到问答管理中按状态筛选查看。'
+  toastOpen.value = true
+}
 </script>
 
 <template>
   <div class="space-y-6">
-    <PageToolbar title="问答详情" description="查看问答上下文并提交商家回复。" search-placeholder="搜索问答上下文">
+    <PageToolbar title="问答详情" description="查看问答上下文并提交商家回复。" :show-search="false" :show-filter="false">
       <template #actions>
         <RouterLink class="btn-secondary shrink-0" to="/questions">
           <ArrowLeft class="size-4" />
@@ -39,8 +74,8 @@ const question = computed(() => questions.find((item) => item.id === props.id))
         </div>
         <div class="mt-5 rounded-lg border border-slate-200 bg-white p-5">
           <label class="mb-2 block text-sm font-bold text-slate-700">商家回复</label>
-          <textarea class="input-field min-h-40 resize-none" value="您好，这款适合长辈生日宴，也有礼盒装，可根据桌数帮您搭配。" />
-          <button class="btn-primary mt-4" type="button">
+          <textarea v-model="reply" class="input-field min-h-40 resize-none" placeholder="请输入回复内容" />
+          <button class="btn-primary mt-4" type="button" @click="submitReply">
             <Send class="size-4" />
             提交回复
           </button>
@@ -61,5 +96,7 @@ const question = computed(() => questions.find((item) => item.id === props.id))
       <h2 class="text-lg font-extrabold text-slate-950">没有找到问答</h2>
       <p class="mt-2 text-sm text-slate-500">请返回问答列表重新选择。</p>
     </section>
+
+    <AppToast :open="toastOpen" :tone="toastTone" :title="toastTitle" :message="toastMessage" @close="toastOpen = false" />
   </div>
 </template>
