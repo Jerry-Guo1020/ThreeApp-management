@@ -16,10 +16,10 @@ const emit = defineEmits<{
   <div v-if="props.open" class="fixed inset-0 z-40 bg-slate-950/40 lg:hidden" @click="emit('close')" />
 
   <aside
-    class="fixed inset-y-0 left-0 z-50 flex w-[17.5rem] max-w-[calc(100vw-2rem)] flex-col border-r border-slate-200 bg-white transition-transform lg:static lg:z-auto lg:w-64 lg:translate-x-0"
+    class="fixed inset-y-0 left-0 z-50 flex h-full w-[17.5rem] max-w-[calc(100vw-2rem)] flex-col overflow-hidden border-r border-slate-200 bg-white transition-transform lg:static lg:z-auto lg:h-screen lg:w-64 lg:shrink-0 lg:translate-x-0"
     :class="props.open ? 'translate-x-0' : '-translate-x-full'"
   >
-    <div class="flex h-16 items-center justify-between border-b border-slate-200 px-5">
+    <div class="flex h-16 shrink-0 items-center justify-between border-b border-slate-200 px-5">
       <RouterLink class="flex items-center gap-3" to="/dashboard" @click="emit('close')">
         <span class="flex size-10 items-center justify-center rounded-lg bg-teal-700 text-lg font-black text-white">T</span>
         <span>

@@ -1,6 +1,7 @@
 export function mockUpload(fileName: string) {
   return {
-    url: `/mock-assets/${fileName}`,
+    url: `https://minio.example.com/threevine/uploads/${fileName}`,
     fileName,
+    persisted: true,
   }
 }
