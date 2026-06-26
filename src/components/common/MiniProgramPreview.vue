@@ -1,13 +1,3 @@
-<script setup lang="ts">
-import { Smartphone } from '@lucide/vue'
-
-import type { Product } from '@/data/mockData'
-
-const props = defineProps<{
-  product: Product
-}>()
-</script>
-
 <template>
   <div class="card p-5">
     <div class="mb-4 flex items-center justify-between">
@@ -26,15 +16,30 @@ const props = defineProps<{
           <p class="mt-1 text-xs text-slate-500">{{ props.product.subtitle }}</p>
         </div>
         <div class="space-y-3 p-4">
-          <div class="h-28 rounded-lg bg-gradient-to-br" :class="props.product.imageTone" />
+          <div
+            class="h-28 rounded-lg bg-gradient-to-br"
+            :class="props.product.coverUrl ? '' : props.product.imageTone"
+            :style="props.product.coverUrl ? { backgroundImage: `url(${props.product.coverUrl})`, backgroundSize: 'cover', backgroundPosition: 'center' } : undefined"
+          />
           <div
             v-for="image in props.product.detailImages.filter((item) => item.status === 'visible')"
             :key="image.id"
             class="h-28 rounded-lg bg-gradient-to-br"
-            :class="image.tone"
+            :class="image.url ? '' : image.tone"
+            :style="image.url ? { backgroundImage: `url(${image.url})`, backgroundSize: 'cover', backgroundPosition: 'center' } : undefined"
           />
         </div>
       </div>
     </div>
   </div>
 </template>
+
+<script setup lang="ts">
+import { Smartphone } from '@lucide/vue'
+
+import type { Product } from '@/types/product'
+
+const props = defineProps<{
+  product: Product
+}>()
+</script>

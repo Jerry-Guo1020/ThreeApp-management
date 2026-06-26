@@ -1,14 +1,3 @@
-<script setup lang="ts">
-import type { FunctionalComponent } from 'vue'
-
-const props = defineProps<{
-  label: string
-  icon: FunctionalComponent
-  title: string
-  danger?: boolean
-}>()
-</script>
-
 <template>
   <button
     class="group relative inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition hover:border-teal-200 hover:bg-teal-50 hover:text-teal-700"
@@ -22,3 +11,14 @@ const props = defineProps<{
     </span>
   </button>
 </template>
+
+<script setup lang="ts">
+import type { FunctionalComponent } from 'vue'
+
+const props = defineProps<{
+  label: string
+  icon: FunctionalComponent
+  title: string
+  danger?: boolean
+}>()
+</script>

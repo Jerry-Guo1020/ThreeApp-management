@@ -1,3 +1,15 @@
+<template>
+  <div class="app-shell flex h-screen overflow-hidden bg-slate-50 app-surface">
+    <AppSidebar :open="sidebarOpen" @close="sidebarOpen = false" />
+    <div class="flex min-w-0 flex-1 flex-col overflow-hidden">
+      <AppHeader :title="title" :description="description" @menu="sidebarOpen = true" />
+      <main class="min-h-0 flex-1 overflow-y-auto px-4 py-5 sm:px-6 lg:px-8 lg:py-8">
+        <RouterView />
+      </main>
+    </div>
+  </div>
+</template>
+
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
@@ -18,15 +30,3 @@ watch(
   },
 )
 </script>
-
-<template>
-  <div class="app-shell flex h-screen overflow-hidden bg-slate-50 app-surface">
-    <AppSidebar :open="sidebarOpen" @close="sidebarOpen = false" />
-    <div class="flex min-w-0 flex-1 flex-col overflow-hidden">
-      <AppHeader :title="title" :description="description" @menu="sidebarOpen = true" />
-      <main class="min-h-0 flex-1 overflow-y-auto px-4 py-5 sm:px-6 lg:px-8 lg:py-8">
-        <RouterView />
-      </main>
-    </div>
-  </div>
-</template>

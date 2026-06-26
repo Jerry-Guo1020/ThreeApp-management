@@ -1,20 +1,3 @@
-<script setup lang="ts">
-import { computed } from 'vue'
-import { ArrowUpRight, MessageSquareText } from '@lucide/vue'
-
-import PageToolbar from '@/components/common/PageToolbar.vue'
-import StatusBadge from '@/components/common/StatusBadge.vue'
-import { productTypeLabels, type ProductType } from '@/data/mockData'
-import { getCommentSummariesByTypeFromStore } from '@/stores/comments'
-
-const props = defineProps<{
-  type: ProductType
-}>()
-
-const summaries = computed(() => getCommentSummariesByTypeFromStore(props.type))
-const totalComments = computed(() => summaries.value.reduce((sum, item) => sum + item.total, 0))
-</script>
-
 <template>
   <div class="space-y-6">
     <PageToolbar
@@ -98,3 +81,27 @@ const totalComments = computed(() => summaries.value.reduce((sum, item) => sum +
     </section>
   </div>
 </template>
+
+<script setup lang="ts">
+import { computed, onMounted } from 'vue'
+import { ArrowUpRight, MessageSquareText } from '@lucide/vue'
+
+import PageToolbar from '@/components/common/PageToolbar.vue'
+import StatusBadge from '@/components/common/StatusBadge.vue'
+import { productTypeLabels, type ProductType } from '@/data/mockData'
+import { fetchCommentsForProduct, getCommentSummariesByTypeFromStore } from '@/stores/comments'
+import { fetchProducts, getStoredProductsByType } from '@/stores/products'
+
+const props = defineProps<{
+  type: ProductType
+}>()
+
+const summaries = computed(() => getCommentSummariesByTypeFromStore(props.type))
+const totalComments = computed(() => summaries.value.reduce((sum, item) => sum + item.total, 0))
+
+onMounted(async () => {
+  await fetchProducts()
+  const products = getStoredProductsByType(props.type)
+  await Promise.all(products.map((product) => fetchCommentsForProduct(product.id)))
+})
+</script>

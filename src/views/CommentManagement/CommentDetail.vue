@@ -1,69 +1,3 @@
-<script setup lang="ts">
-import { computed, ref } from 'vue'
-import { ArrowLeft } from '@lucide/vue'
-
-import CommentReplyModal from '@/components/comment/CommentReplyModal.vue'
-import CommentThread from '@/components/comment/CommentThread.vue'
-import AppToast from '@/components/common/AppToast.vue'
-import PageToolbar from '@/components/common/PageToolbar.vue'
-import StatusBadge from '@/components/common/StatusBadge.vue'
-import { productTypeLabels, type CommentItem, type ProductType } from '@/data/mockData'
-import { commentState, deleteStoredComment, replyToStoredComment, togglePinnedStoredComment } from '@/stores/comments'
-import { getStoredProductById } from '@/stores/products'
-
-const props = defineProps<{
-  type: ProductType
-  productId: string
-}>()
-
-const replyOpen = ref(false)
-const imageOnly = ref(false)
-const activeRating = ref<number | null>(null)
-const activeComment = ref<CommentItem | null>(null)
-const toastOpen = ref(false)
-const toastTone = ref<'success' | 'error'>('success')
-const toastTitle = ref('')
-const toastMessage = ref('')
-
-const product = computed(() => getStoredProductById(props.productId))
-const comments = computed(() => commentState.value.filter((comment) => comment.productId === props.productId))
-const fallbackTitle = computed(() => (props.type ? `${productTypeLabels[props.type]}评论详情` : '评论详情'))
-const unresolvedCount = computed(() => comments.value.filter((comment) => !comment.deleted && !comment.reply).length)
-
-function openToast(tone: 'success' | 'error', title: string, message: string) {
-  toastTone.value = tone
-  toastTitle.value = title
-  toastMessage.value = message
-  toastOpen.value = true
-}
-
-function openReply(comment: CommentItem) {
-  activeComment.value = comment
-  replyOpen.value = true
-}
-
-function submitReply(payload: { id: string; reply: string }) {
-  if (!payload.reply.trim()) {
-    openToast('error', '回复失败', '请先填写回复内容。')
-    return
-  }
-
-  replyToStoredComment(payload.id, payload.reply.trim())
-  replyOpen.value = false
-  openToast('success', '回复成功', '评论回复已更新，可继续处理其他待回复评论。')
-}
-
-function togglePin(commentId: string) {
-  togglePinnedStoredComment(props.productId, commentId)
-  openToast('success', '置顶已更新', '当前商品的评论置顶状态已调整。')
-}
-
-function removeComment(commentId: string) {
-  deleteStoredComment(commentId)
-  openToast('success', '删除成功', '该评论已从当前列表中移除。')
-}
-</script>
-
 <template>
   <div class="space-y-6">
     <PageToolbar
@@ -134,3 +68,96 @@ function removeComment(commentId: string) {
     <AppToast :open="toastOpen" :tone="toastTone" :title="toastTitle" :message="toastMessage" @close="toastOpen = false" />
   </div>
 </template>
+
+<script setup lang="ts">
+import { computed, onMounted, ref } from 'vue'
+import { ArrowLeft } from '@lucide/vue'
+
+import CommentReplyModal from '@/components/comment/CommentReplyModal.vue'
+import CommentThread from '@/components/comment/CommentThread.vue'
+import AppToast from '@/components/common/AppToast.vue'
+import PageToolbar from '@/components/common/PageToolbar.vue'
+import StatusBadge from '@/components/common/StatusBadge.vue'
+import { productTypeLabels, type CommentItem, type ProductType } from '@/data/mockData'
+import { commentState, deleteStoredComment, fetchCommentsForProduct, replyToStoredComment, togglePinnedStoredComment } from '@/stores/comments'
+import { getErrorMessage } from '@/utils/request'
+import { getStoredProductById } from '@/stores/products'
+
+const props = defineProps<{
+  type: ProductType
+  productId: string
+}>()
+
+const replyOpen = ref(false)
+const imageOnly = ref(false)
+const activeRating = ref<number | null>(null)
+const activeComment = ref<CommentItem | null>(null)
+const toastOpen = ref(false)
+const toastTone = ref<'success' | 'error'>('success')
+const toastTitle = ref('')
+const toastMessage = ref('')
+const actionLoading = ref(false)
+
+const product = computed(() => getStoredProductById(props.productId))
+const comments = computed(() => commentState.value.filter((comment) => comment.productId === props.productId))
+const fallbackTitle = computed(() => (props.type ? `${productTypeLabels[props.type]}评论详情` : '评论详情'))
+const unresolvedCount = computed(() => comments.value.filter((comment) => !comment.deleted && !comment.reply).length)
+
+function openToast(tone: 'success' | 'error', title: string, message: string) {
+  toastTone.value = tone
+  toastTitle.value = title
+  toastMessage.value = message
+  toastOpen.value = true
+}
+
+function openReply(comment: CommentItem) {
+  activeComment.value = comment
+  replyOpen.value = true
+}
+
+async function submitReply(payload: { id: string; reply: string }) {
+  if (!payload.reply.trim()) {
+    openToast('error', '回复失败', '请先填写回复内容。')
+    return
+  }
+
+  actionLoading.value = true
+  try {
+    await replyToStoredComment(payload.id, payload.reply.trim())
+    replyOpen.value = false
+    openToast('success', '回复成功', '评论回复已更新，可继续处理其他待回复评论。')
+  } catch (error) {
+    openToast('error', '回复失败', getErrorMessage(error))
+  } finally {
+    actionLoading.value = false
+  }
+}
+
+async function togglePin(commentId: string) {
+  actionLoading.value = true
+  try {
+    await togglePinnedStoredComment(props.productId, commentId)
+    openToast('success', '置顶已更新', '当前商品的评论置顶状态已调整。')
+  } catch (error) {
+    openToast('error', '置顶失败', getErrorMessage(error))
+  } finally {
+    actionLoading.value = false
+  }
+}
+
+async function removeComment(commentId: string) {
+  actionLoading.value = true
+  try {
+    await deleteStoredComment(commentId)
+    openToast('success', '删除成功', '该评论已从当前列表中移除。')
+  } catch (error) {
+    openToast('error', '删除失败', getErrorMessage(error))
+  } finally {
+    actionLoading.value = false
+  }
+}
+
+onMounted(() => {
+  void fetchCommentsForProduct(props.productId)
+})
+</script>

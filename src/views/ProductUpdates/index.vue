@@ -1,67 +1,3 @@
-<script setup lang="ts">
-import { computed, ref } from 'vue'
-import { ArrowDown, ArrowUp, Bell, Pencil, Plus, Trash2 } from '@lucide/vue'
-
-import AppToast from '@/components/common/AppToast.vue'
-import PageToolbar from '@/components/common/PageToolbar.vue'
-import StatusBadge from '@/components/common/StatusBadge.vue'
-import ProductUpdateModal from '@/components/product/ProductUpdateModal.vue'
-import { productTypeLabels, type ProductUpdate, type ProductType } from '@/data/mockData'
-import { deleteStoredUpdate, getStoredUpdatesByType, getVisibleStoredUpdatesByType, moveStoredUpdate, saveStoredUpdate } from '@/stores/updates'
-
-const activeType = ref<ProductType>('wine')
-const modalOpen = ref(false)
-const activeUpdateId = ref<string | null>(null)
-const toastOpen = ref(false)
-const toastTone = ref<'success' | 'error'>('success')
-const toastTitle = ref('')
-const toastMessage = ref('')
-
-const filteredUpdates = computed(() => getStoredUpdatesByType(activeType.value))
-const visibleUpdates = computed(() => getVisibleStoredUpdatesByType(activeType.value))
-const visibleIdSet = computed(() => new Set(visibleUpdates.value.map((item) => item.id)))
-const activeUpdate = computed<ProductUpdate | null>(() => filteredUpdates.value.find((item) => item.id === activeUpdateId.value) ?? null)
-
-function openToast(tone: 'success' | 'error', title: string, message: string) {
-  toastTone.value = tone
-  toastTitle.value = title
-  toastMessage.value = message
-  toastOpen.value = true
-}
-
-function openCreateModal() {
-  activeUpdateId.value = null
-  modalOpen.value = true
-}
-
-function openEditModal(updateId: string) {
-  activeUpdateId.value = updateId
-  modalOpen.value = true
-}
-
-function closeModal() {
-  activeUpdateId.value = null
-  modalOpen.value = false
-}
-
-function handleSave(payload: Parameters<typeof saveStoredUpdate>[0]) {
-  const result = saveStoredUpdate(payload)
-  openToast(result.ok ? 'success' : 'error', result.ok ? '保存成功' : '保存失败', result.message)
-  if (result.ok) {
-    closeModal()
-  }
-}
-
-function handleDelete(updateId: string) {
-  const result = deleteStoredUpdate(updateId)
-  openToast(result.ok ? 'success' : 'error', result.ok ? '删除成功' : '删除失败', result.message)
-}
-
-function move(updateId: string, direction: 'up' | 'down') {
-  moveStoredUpdate(activeType.value, updateId, direction)
-}
-</script>
-
 <template>
   <div class="space-y-6">
     <PageToolbar title="商品更新" description="维护首页文字轮播通知，已发布内容按顺序最多展示 3 条。" :show-search="false" :show-filter="false">
@@ -158,3 +94,68 @@ function move(updateId: string, direction: 'up' | 'down') {
     <AppToast :open="toastOpen" :tone="toastTone" :title="toastTitle" :message="toastMessage" @close="toastOpen = false" />
   </div>
 </template>
+
+<script setup lang="ts">
+import { computed, ref } from 'vue'
+import { ArrowDown, ArrowUp, Bell, Pencil, Plus, Trash2 } from '@lucide/vue'
+
+import AppToast from '@/components/common/AppToast.vue'
+import PageToolbar from '@/components/common/PageToolbar.vue'
+import StatusBadge from '@/components/common/StatusBadge.vue'
+import ProductUpdateModal from '@/components/product/ProductUpdateModal.vue'
+import { productTypeLabels, type ProductUpdate, type ProductType } from '@/data/mockData'
+import { deleteStoredUpdate, getStoredUpdatesByType, getVisibleStoredUpdatesByType, moveStoredUpdate, saveStoredUpdate } from '@/stores/updates'
+
+const activeType = ref<ProductType>('wine')
+const modalOpen = ref(false)
+const activeUpdateId = ref<string | null>(null)
+const toastOpen = ref(false)
+const toastTone = ref<'success' | 'error'>('success')
+const toastTitle = ref('')
+const toastMessage = ref('')
+
+const filteredUpdates = computed(() => getStoredUpdatesByType(activeType.value))
+const visibleUpdates = computed(() => getVisibleStoredUpdatesByType(activeType.value))
+const visibleIdSet = computed(() => new Set(visibleUpdates.value.map((item) => item.id)))
+const activeUpdate = computed<ProductUpdate | null>(() => filteredUpdates.value.find((item) => item.id === activeUpdateId.value) ?? null)
+
+function openToast(tone: 'success' | 'error', title: string, message: string) {
+  toastTone.value = tone
+  toastTitle.value = title
+  toastMessage.value = message
+  toastOpen.value = true
+}
+
+function openCreateModal() {
+  activeUpdateId.value = null
+  modalOpen.value = true
+}
+
+function openEditModal(updateId: string) {
+  activeUpdateId.value = updateId
+  modalOpen.value = true
+}
+
+function closeModal() {
+  activeUpdateId.value = null
+  modalOpen.value = false
+}
+
+function handleSave(payload: Parameters<typeof saveStoredUpdate>[0]) {
+  const result = saveStoredUpdate(payload)
+  openToast(result.ok ? 'success' : 'error', result.ok ? '保存成功' : '保存失败', result.message)
+  if (result.ok) {
+    closeModal()
+  }
+}
+
+function handleDelete(updateId: string) {
+  const result = deleteStoredUpdate(updateId)
+  openToast(result.ok ? 'success' : 'error', result.ok ? '删除成功' : '删除失败', result.message)
+}
+
+function move(updateId: string, direction: 'up' | 'down') {
+  moveStoredUpdate(activeType.value, updateId, direction)
+}
+</script>
+

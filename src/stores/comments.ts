@@ -1,46 +1,127 @@
 import { ref } from 'vue'
 
-import { comments as commentSeed, type ProductType } from '@/data/mockData'
-
+import type { ProductType } from '@/data/mockData'
+import type { CommentItem, CommentSummary } from '@/types/comment'
 import { getStoredProductsByType } from './products'
 import { readStorage, writeStorage } from './persistence'
+import { getErrorMessage, requestData } from '@/utils/request'
+
+interface ReviewApiItem {
+  id?: number | string
+  nickname?: string
+  score?: number
+  createdAt?: string
+  content?: string
+  images?: string[]
+  replyContent?: string
+  isPinned?: boolean
+  deleted?: boolean
+}
+
+interface ReviewSummaryApi {
+  commentCount?: number
+}
 
 const COMMENT_STORAGE_KEY = 'threeapp-comments'
 
-export const commentState = ref(readStorage(COMMENT_STORAGE_KEY, commentSeed))
+export const commentState = ref<CommentItem[]>(readStorage<CommentItem[]>(COMMENT_STORAGE_KEY, []))
+export const commentLoading = ref(false)
+export const commentError = ref('')
 
 function persistComments() {
   writeStorage(COMMENT_STORAGE_KEY, commentState.value)
+}
+
+function mapComment(productId: string, item: ReviewApiItem): CommentItem {
+  return {
+    id: String(item.id ?? ''),
+    productId,
+    author: item.nickname?.trim() || 'null',
+    rating: Number(item.score ?? 0) || 0,
+    createdAt: item.createdAt?.trim() || 'null',
+    content: item.content?.trim() || 'null',
+    images: Array.isArray(item.images) ? item.images.length : 0,
+    pinned: Boolean(item.isPinned),
+    deleted: Boolean(item.deleted),
+    reply: item.replyContent?.trim() || '',
+  }
+}
+
+export async function fetchCommentsForProduct(productId: string) {
+  commentLoading.value = true
+  commentError.value = ''
+
+  try {
+    const data = await requestData<{ summary?: ReviewSummaryApi; items: ReviewApiItem[] }>(`/api/admin/reviews/products/${productId}`)
+    const nextComments = Array.isArray(data.items) ? data.items.map((item) => mapComment(productId, item)) : []
+    commentState.value = [
+      ...commentState.value.filter((comment) => comment.productId !== productId),
+      ...nextComments,
+    ]
+    persistComments()
+    return {
+      items: nextComments,
+      total: Number(data.summary?.commentCount ?? nextComments.length ?? 0) || 0,
+    }
+  } catch (error) {
+    commentState.value = commentState.value.filter((comment) => comment.productId !== productId)
+    persistComments()
+    commentError.value = getErrorMessage(error)
+    return {
+      items: [] as CommentItem[],
+      total: 0,
+    }
+  } finally {
+    commentLoading.value = false
+  }
 }
 
 export function getStoredCommentsByProduct(productId: string) {
   return commentState.value.filter((comment) => comment.productId === productId)
 }
 
-export function replyToStoredComment(commentId: string, reply: string) {
-  commentState.value = commentState.value.map((comment) => (comment.id === commentId ? { ...comment, reply } : comment))
-  persistComments()
-}
+export async function replyToStoredComment(commentId: string, reply: string) {
+  const data = await requestData<ReviewApiItem>(`/api/admin/reviews/${commentId}/reply`, {
+    method: 'PATCH',
+    body: JSON.stringify({ replyContent: reply }),
+  })
 
-export function togglePinnedStoredComment(productId: string, commentId: string) {
   commentState.value = commentState.value.map((comment) => {
-    if (comment.productId !== productId) return comment
-    if (comment.id === commentId) return { ...comment, pinned: !comment.pinned }
-    return { ...comment, pinned: false }
+    if (comment.id !== commentId) return comment
+    return mapComment(comment.productId, data)
   })
   persistComments()
 }
 
-export function deleteStoredComment(commentId: string) {
+export async function togglePinnedStoredComment(productId: string, commentId: string) {
+  const current = commentState.value.find((comment) => comment.id === commentId)
+  const data = await requestData<ReviewApiItem>(`/api/admin/reviews/${commentId}/pin`, {
+    method: 'PATCH',
+    body: JSON.stringify({ isPinned: !current?.pinned }),
+  })
+
+  commentState.value = commentState.value.map((comment) => {
+    if (comment.productId !== productId) return comment
+    if (comment.id !== commentId) return { ...comment, pinned: false }
+    return mapComment(productId, data)
+  })
+  persistComments()
+}
+
+export async function deleteStoredComment(commentId: string) {
+  await requestData<{ id: string | number; deleted: boolean }>(`/api/admin/reviews/${commentId}`, {
+    method: 'DELETE',
+  })
+
   commentState.value = commentState.value.map((comment) => (comment.id === commentId ? { ...comment, deleted: true, pinned: false } : comment))
   persistComments()
 }
 
-export function getCommentSummariesByTypeFromStore(type: ProductType) {
+export function getCommentSummariesByTypeFromStore(type: ProductType): CommentSummary[] {
   return getStoredProductsByType(type).map((product) => {
     const productComments = commentState.value
       .filter((comment) => comment.productId === product.id && !comment.deleted)
-      .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+      .sort((a, b) => String(b.createdAt ?? '').localeCompare(String(a.createdAt ?? '')))
 
     const repliedCount = productComments.filter((comment) => comment.reply).length
     const pendingCount = productComments.filter((comment) => !comment.reply).length

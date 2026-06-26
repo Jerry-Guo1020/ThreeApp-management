@@ -1,37 +1,3 @@
-<script setup lang="ts">
-import { computed } from 'vue'
-import { MessageSquareReply, MousePointerClick, Star, Trash2 } from '@lucide/vue'
-
-import StatusBadge from '@/components/common/StatusBadge.vue'
-import type { CommentItem } from '@/data/mockData'
-
-const props = withDefaults(
-  defineProps<{
-    comments: CommentItem[]
-    imageOnly?: boolean
-    rating?: number | null
-  }>(),
-  {
-    imageOnly: false,
-    rating: null,
-  },
-)
-
-const emit = defineEmits<{
-  reply: [comment: CommentItem]
-  pin: [commentId: string]
-  remove: [commentId: string]
-}>()
-
-const visibleComments = computed(() => {
-  return [...props.comments]
-    .filter((comment) => !comment.deleted)
-    .filter((comment) => (props.imageOnly ? comment.images > 0 : true))
-    .filter((comment) => (props.rating ? comment.rating === props.rating : true))
-    .sort((a, b) => Number(b.pinned) - Number(a.pinned))
-})
-</script>
-
 <template>
   <div class="space-y-4">
     <article
@@ -85,3 +51,37 @@ const visibleComments = computed(() => {
     </div>
   </div>
 </template>
+
+<script setup lang="ts">
+import { computed } from 'vue'
+import { MessageSquareReply, MousePointerClick, Star, Trash2 } from '@lucide/vue'
+
+import StatusBadge from '@/components/common/StatusBadge.vue'
+import type { CommentItem } from '@/data/mockData'
+
+const props = withDefaults(
+  defineProps<{
+    comments: CommentItem[]
+    imageOnly?: boolean
+    rating?: number | null
+  }>(),
+  {
+    imageOnly: false,
+    rating: null,
+  },
+)
+
+const emit = defineEmits<{
+  reply: [comment: CommentItem]
+  pin: [commentId: string]
+  remove: [commentId: string]
+}>()
+
+const visibleComments = computed(() => {
+  return [...props.comments]
+    .filter((comment) => !comment.deleted)
+    .filter((comment) => (props.imageOnly ? comment.images > 0 : true))
+    .filter((comment) => (props.rating ? comment.rating === props.rating : true))
+    .sort((a, b) => Number(b.pinned) - Number(a.pinned))
+})
+</script>

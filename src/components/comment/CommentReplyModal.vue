@@ -1,37 +1,3 @@
-<script setup lang="ts">
-import { Send, X } from '@lucide/vue'
-import { computed, ref, watch } from 'vue'
-
-import type { CommentItem } from '@/data/mockData'
-
-const props = defineProps<{
-  open: boolean
-  comment?: CommentItem | null
-}>()
-
-const emit = defineEmits<{
-  close: []
-  submit: [payload: { id: string; reply: string }]
-}>()
-
-const replyText = ref('')
-
-watch(
-  () => props.comment,
-  (comment) => {
-    replyText.value = comment?.reply ?? ''
-  },
-  { immediate: true },
-)
-
-const isEdit = computed(() => Boolean(props.comment?.reply))
-
-function handleSubmit() {
-  if (!props.comment) return
-  emit('submit', { id: props.comment.id, reply: replyText.value.trim() })
-}
-</script>
-
 <template>
   <div v-if="props.open" class="fixed inset-0 z-50 grid place-items-center bg-slate-950/35 p-4" @click.self="emit('close')">
     <section class="w-full max-w-md rounded-lg bg-white shadow-2xl">
@@ -65,3 +31,37 @@ function handleSubmit() {
     </section>
   </div>
 </template>
+
+<script setup lang="ts">
+import { Send, X } from '@lucide/vue'
+import { computed, ref, watch } from 'vue'
+
+import type { CommentItem } from '@/data/mockData'
+
+const props = defineProps<{
+  open: boolean
+  comment?: CommentItem | null
+}>()
+
+const emit = defineEmits<{
+  close: []
+  submit: [payload: { id: string; reply: string }]
+}>()
+
+const replyText = ref('')
+
+watch(
+  () => props.comment,
+  (comment) => {
+    replyText.value = comment?.reply ?? ''
+  },
+  { immediate: true },
+)
+
+const isEdit = computed(() => Boolean(props.comment?.reply))
+
+function handleSubmit() {
+  if (!props.comment) return
+  emit('submit', { id: props.comment.id, reply: replyText.value.trim() })
+}
+</script>

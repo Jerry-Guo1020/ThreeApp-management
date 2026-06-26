@@ -1,23 +1,3 @@
-<script setup lang="ts">
-import { Search, SlidersHorizontal } from '@lucide/vue'
-
-withDefaults(
-  defineProps<{
-    title: string
-    description?: string
-    searchPlaceholder?: string
-    showFilter?: boolean
-    showSearch?: boolean
-  }>(),
-  {
-    description: '',
-    searchPlaceholder: '搜索商品、评论、问答',
-    showFilter: true,
-    showSearch: true,
-  },
-)
-</script>
-
 <template>
   <section class="card p-4 sm:p-5">
     <div class="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
@@ -42,3 +22,23 @@ withDefaults(
     </div>
   </section>
 </template>
+
+<script setup lang="ts">
+import { Search, SlidersHorizontal } from '@lucide/vue'
+
+withDefaults(
+  defineProps<{
+    title: string
+    description?: string
+    searchPlaceholder?: string
+    showFilter?: boolean
+    showSearch?: boolean
+  }>(),
+  {
+    description: '',
+    searchPlaceholder: '搜索商品、评论、问答',
+    showFilter: true,
+    showSearch: true,
+  },
+)
+</script>

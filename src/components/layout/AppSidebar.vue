@@ -1,17 +1,3 @@
-<script setup lang="ts">
-import { X } from '@lucide/vue'
-
-import { menuGroups } from '@/config/menu'
-
-const props = defineProps<{
-  open: boolean
-}>()
-
-const emit = defineEmits<{
-  close: []
-}>()
-</script>
-
 <template>
   <div v-if="props.open" class="fixed inset-0 z-40 bg-slate-950/40 lg:hidden" @click="emit('close')" />
 
@@ -63,3 +49,17 @@ const emit = defineEmits<{
     </nav>
   </aside>
 </template>
+
+<script setup lang="ts">
+import { X } from '@lucide/vue'
+
+import { menuGroups } from '@/config/menu'
+
+const props = defineProps<{
+  open: boolean
+}>()
+
+const emit = defineEmits<{
+  close: []
+}>()
+</script>

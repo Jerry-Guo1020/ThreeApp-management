@@ -1,3 +1,12 @@
+<template>
+  <span
+    class="inline-flex min-h-6 items-center rounded-full px-2.5 py-0.5 text-xs font-bold ring-1 ring-inset"
+    :class="toneClass"
+  >
+    {{ text }}
+  </span>
+</template>
+
 <script setup lang="ts">
 import { computed } from 'vue'
 
@@ -35,12 +44,3 @@ const text = computed(() => {
   return labels[props.status] ?? props.status
 })
 </script>
-
-<template>
-  <span
-    class="inline-flex min-h-6 items-center rounded-full px-2.5 py-0.5 text-xs font-bold ring-1 ring-inset"
-    :class="toneClass"
-  >
-    {{ text }}
-  </span>
-</template>

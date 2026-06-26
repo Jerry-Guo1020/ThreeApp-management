@@ -1,53 +1,3 @@
-<script setup lang="ts">
-import { ArrowLeft, Send } from '@lucide/vue'
-import { computed, ref, watch } from 'vue'
-
-import AppToast from '@/components/common/AppToast.vue'
-import PageToolbar from '@/components/common/PageToolbar.vue'
-import StatusBadge from '@/components/common/StatusBadge.vue'
-import { businessTypeLabels } from '@/data/mockData'
-import { getStoredQuestionById, replyToStoredQuestion } from '@/stores/questions'
-
-const props = defineProps<{
-  id: string
-}>()
-
-const reply = ref('')
-const toastOpen = ref(false)
-const toastTone = ref<'success' | 'error'>('success')
-const toastTitle = ref('')
-const toastMessage = ref('')
-
-const question = computed(() => getStoredQuestionById(props.id))
-
-watch(
-  question,
-  (value) => {
-    reply.value = value?.reply ?? ''
-  },
-  { immediate: true },
-)
-
-function submitReply() {
-  if (!reply.value.trim()) {
-    toastTone.value = 'error'
-    toastTitle.value = '回复失败'
-    toastMessage.value = '请先填写回复内容。'
-    toastOpen.value = true
-    return
-  }
-
-  if (question.value) {
-    replyToStoredQuestion(question.value.id, reply.value.trim())
-  }
-
-  toastTone.value = 'success'
-  toastTitle.value = '回复成功'
-  toastMessage.value = '该反馈已标记为已回复，可回到问答管理中按状态筛选查看。'
-  toastOpen.value = true
-}
-</script>
-
 <template>
   <div class="space-y-6">
     <PageToolbar title="问答详情" description="查看小程序内用户提交的业务反馈并处理回复。" :show-search="false" :show-filter="false">
@@ -114,3 +64,76 @@ function submitReply() {
     <AppToast :open="toastOpen" :tone="toastTone" :title="toastTitle" :message="toastMessage" @close="toastOpen = false" />
   </div>
 </template>
+
+<script setup lang="ts">
+import { ArrowLeft, Send } from '@lucide/vue'
+import { computed, onMounted, ref, watch } from 'vue'
+
+import AppToast from '@/components/common/AppToast.vue'
+import PageToolbar from '@/components/common/PageToolbar.vue'
+import StatusBadge from '@/components/common/StatusBadge.vue'
+import { businessTypeLabels } from '@/data/mockData'
+import { getErrorMessage } from '@/utils/request'
+import { fetchQuestions, getStoredQuestionById, replyToStoredQuestion } from '@/stores/questions'
+
+const props = defineProps<{
+  id: string
+}>()
+
+const reply = ref('')
+const submitting = ref(false)
+const toastOpen = ref(false)
+const toastTone = ref<'success' | 'error'>('success')
+const toastTitle = ref('')
+const toastMessage = ref('')
+
+const question = computed(() => getStoredQuestionById(props.id))
+
+watch(
+  question,
+  (value) => {
+    reply.value = value?.reply ?? ''
+  },
+  { immediate: true },
+)
+
+async function submitReply() {
+  if (!reply.value.trim()) {
+    toastTone.value = 'error'
+    toastTitle.value = '回复失败'
+    toastMessage.value = '请先填写回复内容。'
+    toastOpen.value = true
+    return
+  }
+
+  if (!question.value) {
+    toastTone.value = 'error'
+    toastTitle.value = '回复失败'
+    toastMessage.value = '当前问答不存在，无法提交回复。'
+    toastOpen.value = true
+    return
+  }
+
+  submitting.value = true
+
+  try {
+    await replyToStoredQuestion(question.value.id, reply.value.trim())
+    toastTone.value = 'success'
+    toastTitle.value = '回复成功'
+    toastMessage.value = '该反馈已标记为已回复，可回到问答管理中按状态筛选查看。'
+  } catch (error) {
+    toastTone.value = 'error'
+    toastTitle.value = '回复失败'
+    toastMessage.value = getErrorMessage(error)
+  } finally {
+    submitting.value = false
+    toastOpen.value = true
+  }
+}
+
+onMounted(() => {
+  if (!question.value) {
+    void fetchQuestions()
+  }
+})
+</script>

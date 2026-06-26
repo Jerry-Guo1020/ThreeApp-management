@@ -1,28 +1,3 @@
-<script setup lang="ts">
-import { KeyRound, LogIn, Mail } from '@lucide/vue'
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
-
-import { authenticateUser } from '@/stores/user'
-
-const router = useRouter()
-const account = ref('admin@threeapp.com')
-const password = ref('password')
-const loginError = ref('')
-
-async function submit() {
-  const result = authenticateUser(account.value, password.value)
-
-  if (!result.ok) {
-    loginError.value = result.message
-    return
-  }
-
-  loginError.value = ''
-  await router.push('/dashboard')
-}
-</script>
-
 <template>
   <main class="flex min-h-screen items-center justify-center bg-slate-100 px-4 py-8">
     <div class="w-full max-w-5xl space-y-6">
@@ -43,7 +18,7 @@ async function submit() {
               <span class="mb-2 block text-sm font-bold text-slate-700">账号</span>
               <span class="relative block">
                 <Mail class="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
-                <input v-model="account" class="input-field has-leading-icon" />
+                <input v-model="account" class="input-field has-leading-icon" placeholder="请输入管理员账号" />
               </span>
             </label>
 
@@ -51,7 +26,7 @@ async function submit() {
               <span class="mb-2 block text-sm font-bold text-slate-700">密码</span>
               <span class="relative block">
                 <KeyRound class="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
-                <input v-model="password" class="input-field has-leading-icon" type="password" />
+                <input v-model="password" class="input-field has-leading-icon" type="password" placeholder="请输入管理员密码" />
               </span>
             </label>
 
@@ -59,9 +34,9 @@ async function submit() {
               {{ loginError }}
             </p>
 
-            <button class="btn-primary w-full" type="submit">
+            <button class="btn-primary w-full" type="submit" :disabled="authLoading">
               <LogIn class="size-4" />
-              登录
+              {{ authLoading ? '登录中...' : '登录' }}
             </button>
           </form>
         </section>
@@ -73,3 +48,28 @@ async function submit() {
     </div>
   </main>
 </template>
+
+<script setup lang="ts">
+import { KeyRound, LogIn, Mail } from '@lucide/vue'
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+
+import { authenticateUser, authLoading } from '@/stores/user'
+
+const router = useRouter()
+const account = ref('admin')
+const password = ref('admin123456')
+const loginError = ref('')
+
+async function submit() {
+  const result = await authenticateUser(account.value, password.value)
+
+  if (!result.ok) {
+    loginError.value = result.message
+    return
+  }
+
+  loginError.value = ''
+  await router.push('/dashboard')
+}
+</script>

@@ -1,41 +1,3 @@
-<script setup lang="ts">
-import { computed, ref } from 'vue'
-import { Eye, GripVertical, MessageSquareText, Pencil, Plus, RefreshCw } from '@lucide/vue'
-
-import ActionIconButton from '@/components/common/ActionIconButton.vue'
-import DataTable from '@/components/common/DataTable.vue'
-import MiniProgramPreview from '@/components/common/MiniProgramPreview.vue'
-import PageToolbar from '@/components/common/PageToolbar.vue'
-import StatusBadge from '@/components/common/StatusBadge.vue'
-import DetailImageManager from '@/components/product/DetailImageManager.vue'
-import ProductFormDrawer from '@/components/product/ProductFormDrawer.vue'
-import type { Product } from '@/data/mockData'
-import { getStoredProductsByType, reorderStoredProducts } from '@/stores/products'
-
-const drawerOpen = ref(false)
-const activeProduct = ref<Product | null>(null)
-const showSortGuide = ref(false)
-const draggingId = ref<string | null>(null)
-const products = computed(() => getStoredProductsByType('specialty'))
-const selectedProduct = computed(() => activeProduct.value ?? products.value[0] ?? null)
-
-function openDrawer(product?: Product) {
-  activeProduct.value = product ?? null
-  drawerOpen.value = true
-}
-
-function handleDragStart(productId: string) {
-  draggingId.value = productId
-}
-
-function handleDrop(targetId: string) {
-  if (!draggingId.value) return
-  const nextProducts = reorderStoredProducts('specialty', draggingId.value, targetId)
-  activeProduct.value = nextProducts.find((product) => product.id === targetId) ?? activeProduct.value
-  draggingId.value = null
-}
-</script>
-
 <template>
   <div class="space-y-6">
     <PageToolbar
@@ -131,3 +93,54 @@ function handleDrop(targetId: string) {
     <ProductFormDrawer :open="drawerOpen" type="specialty" :product="activeProduct" @close="drawerOpen = false" />
   </div>
 </template>
+
+<script setup lang="ts">
+import { computed, onMounted, ref } from 'vue'
+import { Eye, GripVertical, MessageSquareText, Pencil, Plus, RefreshCw } from '@lucide/vue'
+
+import ActionIconButton from '@/components/common/ActionIconButton.vue'
+import DataTable from '@/components/common/DataTable.vue'
+import MiniProgramPreview from '@/components/common/MiniProgramPreview.vue'
+import PageToolbar from '@/components/common/PageToolbar.vue'
+import StatusBadge from '@/components/common/StatusBadge.vue'
+import DetailImageManager from '@/components/product/DetailImageManager.vue'
+import ProductFormDrawer from '@/components/product/ProductFormDrawer.vue'
+import type { Product } from '@/types/product'
+import { fetchProducts, getStoredProductsByType, reorderStoredProducts } from '@/stores/products'
+import { getErrorMessage } from '@/utils/request'
+
+const drawerOpen = ref(false)
+const activeProduct = ref<Product | null>(null)
+const showSortGuide = ref(false)
+const draggingId = ref<string | null>(null)
+const products = computed(() => getStoredProductsByType('specialty'))
+const selectedProduct = computed(() => activeProduct.value ?? products.value[0] ?? null)
+
+function openDrawer(product?: Product) {
+  activeProduct.value = product ?? null
+  drawerOpen.value = true
+}
+
+function handleDragStart(productId: string) {
+  draggingId.value = productId
+}
+
+async function handleDrop(targetId: string) {
+  if (!draggingId.value) return
+
+  try {
+    const nextProducts = await reorderStoredProducts('specialty', draggingId.value, targetId)
+    activeProduct.value = nextProducts.find((product) => product.id === targetId) ?? activeProduct.value
+  } catch (error) {
+    console.error(getErrorMessage(error))
+  } finally {
+    draggingId.value = null
+  }
+}
+
+onMounted(() => {
+  if (!products.value.length) {
+    void fetchProducts()
+  }
+})
+</script>

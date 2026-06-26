@@ -1,57 +1,3 @@
-<script setup lang="ts">
-import { computed, ref, watch } from 'vue'
-import { CalendarDays, Save, X } from '@lucide/vue'
-
-import type { ProductUpdate, ProductType } from '@/data/mockData'
-import type { SaveUpdatePayload } from '@/stores/updates'
-
-const props = defineProps<{
-  open: boolean
-  type: ProductType
-  update?: ProductUpdate | null
-}>()
-
-const emit = defineEmits<{
-  close: []
-  save: [payload: SaveUpdatePayload]
-}>()
-
-const title = ref('')
-const description = ref('')
-const publishMode = ref<'published' | 'draft' | 'scheduled'>('published')
-const scheduledAt = ref('')
-
-const isEditing = computed(() => Boolean(props.update))
-const modalTitle = computed(() => `${isEditing.value ? '编辑' : '新增'}${props.type === 'wine' ? '酒水' : '特产'}通知`)
-const saveButtonLabel = computed(() => {
-  if (publishMode.value === 'draft') return '保存草稿'
-  if (publishMode.value === 'scheduled') return '保存定时通知'
-  return '立即发布'
-})
-
-watch(
-  () => [props.open, props.type, props.update] as const,
-  () => {
-    title.value = props.update?.title ?? ''
-    description.value = props.update?.description ?? ''
-    publishMode.value = (props.update?.status === 'hidden' ? 'draft' : props.update?.status ?? 'published') as 'published' | 'draft' | 'scheduled'
-    scheduledAt.value = props.update?.scheduledAt ?? ''
-  },
-  { immediate: true },
-)
-
-function submit() {
-  emit('save', {
-    id: props.update?.id,
-    type: props.type,
-    title: title.value,
-    description: description.value,
-    status: publishMode.value,
-    scheduledAt: scheduledAt.value,
-  })
-}
-</script>
-
 <template>
   <div v-if="props.open" class="fixed inset-0 z-50 grid place-items-center bg-slate-950/35 p-4" @click.self="emit('close')">
     <section class="w-full max-w-xl rounded-lg bg-white shadow-2xl">
@@ -129,3 +75,57 @@ function submit() {
     </section>
   </div>
 </template>
+
+<script setup lang="ts">
+import { computed, ref, watch } from 'vue'
+import { CalendarDays, Save, X } from '@lucide/vue'
+
+import type { ProductUpdate, ProductType } from '@/data/mockData'
+import type { SaveUpdatePayload } from '@/stores/updates'
+
+const props = defineProps<{
+  open: boolean
+  type: ProductType
+  update?: ProductUpdate | null
+}>()
+
+const emit = defineEmits<{
+  close: []
+  save: [payload: SaveUpdatePayload]
+}>()
+
+const title = ref('')
+const description = ref('')
+const publishMode = ref<'published' | 'draft' | 'scheduled'>('published')
+const scheduledAt = ref('')
+
+const isEditing = computed(() => Boolean(props.update))
+const modalTitle = computed(() => `${isEditing.value ? '编辑' : '新增'}${props.type === 'wine' ? '酒水' : '特产'}通知`)
+const saveButtonLabel = computed(() => {
+  if (publishMode.value === 'draft') return '保存草稿'
+  if (publishMode.value === 'scheduled') return '保存定时通知'
+  return '立即发布'
+})
+
+watch(
+  () => [props.open, props.type, props.update] as const,
+  () => {
+    title.value = props.update?.title ?? ''
+    description.value = props.update?.description ?? ''
+    publishMode.value = (props.update?.status === 'hidden' ? 'draft' : props.update?.status ?? 'published') as 'published' | 'draft' | 'scheduled'
+    scheduledAt.value = props.update?.scheduledAt ?? ''
+  },
+  { immediate: true },
+)
+
+function submit() {
+  emit('save', {
+    id: props.update?.id,
+    type: props.type,
+    title: title.value,
+    description: description.value,
+    status: publishMode.value,
+    scheduledAt: scheduledAt.value,
+  })
+}
+</script>

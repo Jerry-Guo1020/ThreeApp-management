@@ -1,9 +1,8 @@
 import { ref } from 'vue'
 
-import { updates as updateSeed, type ProductType, type ProductUpdate } from '@/data/mockData'
-
 import { readStorage, writeStorage } from './persistence'
 import { currentUser } from './user'
+import type { ProductType, ProductUpdate } from '@/data/mockData'
 
 const UPDATE_STORAGE_KEY = 'threeapp-updates'
 
@@ -16,7 +15,7 @@ export interface SaveUpdatePayload {
   scheduledAt?: string
 }
 
-export const updateState = ref<ProductUpdate[]>(normalizeUpdates(readStorage(UPDATE_STORAGE_KEY, updateSeed)))
+export const updateState = ref<ProductUpdate[]>(normalizeUpdates(readStorage<ProductUpdate[]>(UPDATE_STORAGE_KEY, [])))
 
 function persistUpdates() {
   writeStorage(UPDATE_STORAGE_KEY, updateState.value)
@@ -32,7 +31,7 @@ function normalizeUpdates(list: ProductUpdate[]) {
 
     ordered.forEach((item, index) => {
       item.sort = index + 1
-      item.description = item.description ?? '用于首页文字轮播展示的通知内容。'
+      item.description = item.description ?? 'null'
       item.scheduledAt = item.scheduledAt ?? ''
     })
   })
@@ -57,12 +56,16 @@ function formatNow() {
 
 function reindexType(type: ProductType) {
   const ordered = updateState.value.filter((item) => item.type === type).sort((left, right) => left.sort - right.sort)
-  const orderMap = new Map(ordered.map((item, index) => [item.id, index + 1]))
+  const orderMap = new Map(ordered.map((item) => [item.id, indexOfItem(ordered, item.id) + 1]))
 
   updateState.value = updateState.value.map((item) => {
     if (item.type !== type) return item
     return { ...item, sort: orderMap.get(item.id) ?? item.sort }
   })
+}
+
+function indexOfItem(list: ProductUpdate[], id: string) {
+  return list.findIndex((item) => item.id === id)
 }
 
 export function getStoredUpdatesByType(type: ProductType) {

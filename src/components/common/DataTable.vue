@@ -1,9 +1,3 @@
-<script setup lang="ts">
-defineProps<{
-  columns: string[]
-}>()
-</script>
-
 <template>
   <div class="card overflow-hidden">
     <div class="overflow-x-auto">
@@ -27,3 +21,9 @@ defineProps<{
     </div>
   </div>
 </template>
+
+<script setup lang="ts">
+defineProps<{
+  columns: string[]
+}>()
+</script>

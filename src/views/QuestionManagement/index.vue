@@ -1,20 +1,3 @@
-<script setup lang="ts">
-import { computed, ref } from 'vue'
-import { ArrowUpRight, MessageSquareReply, Phone, Shapes } from '@lucide/vue'
-
-import PageToolbar from '@/components/common/PageToolbar.vue'
-import StatusBadge from '@/components/common/StatusBadge.vue'
-import { businessTypeLabels } from '@/data/mockData'
-import { questionState } from '@/stores/questions'
-
-const activeFilter = ref<'all' | 'pending' | 'replied'>('all')
-
-const filteredQuestions = computed(() => {
-  if (activeFilter.value === 'all') return questionState.value
-  return questionState.value.filter((question) => question.status === activeFilter.value)
-})
-</script>
-
 <template>
   <div class="space-y-6">
     <PageToolbar title="问答管理" description="集中处理用户在小程序内提交的业务咨询与问题反馈。" :show-search="false" :show-filter="false">
@@ -66,3 +49,26 @@ const filteredQuestions = computed(() => {
     </section>
   </div>
 </template>
+
+<script setup lang="ts">
+import { computed, onMounted, ref } from 'vue'
+import { ArrowUpRight, MessageSquareReply, Phone, Shapes } from '@lucide/vue'
+
+import PageToolbar from '@/components/common/PageToolbar.vue'
+import StatusBadge from '@/components/common/StatusBadge.vue'
+import { businessTypeLabels } from '@/data/mockData'
+import { fetchQuestions, questionState } from '@/stores/questions'
+
+const activeFilter = ref<'all' | 'pending' | 'replied'>('all')
+
+const filteredQuestions = computed(() => {
+  if (activeFilter.value === 'all') return questionState.value
+  return questionState.value.filter((question) => question.status === activeFilter.value)
+})
+
+onMounted(() => {
+  if (!questionState.value.length) {
+    void fetchQuestions()
+  }
+})
+</script>

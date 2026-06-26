@@ -1,30 +1,3 @@
-<script setup lang="ts">
-import { MessagesSquare } from '@lucide/vue'
-
-import CommentList from './CommentList.vue'
-import type { CommentItem } from '@/data/mockData'
-
-const props = withDefaults(
-  defineProps<{
-    comments: CommentItem[]
-    imageOnly?: boolean
-    rating?: number | null
-  }>(),
-  {
-    imageOnly: false,
-    rating: null,
-  },
-)
-
-const emit = defineEmits<{
-  reply: [comment: CommentItem]
-  pin: [commentId: string]
-  remove: [commentId: string]
-  toggleImageOnly: []
-  setRating: [rating: number | null]
-}>()
-</script>
-
 <template>
   <section class="card p-5">
     <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -54,3 +27,30 @@ const emit = defineEmits<{
     <CommentList :comments="props.comments" :image-only="props.imageOnly" :rating="props.rating" @reply="emit('reply', $event)" @pin="emit('pin', $event)" @remove="emit('remove', $event)" />
   </section>
 </template>
+
+<script setup lang="ts">
+import { MessagesSquare } from '@lucide/vue'
+
+import CommentList from './CommentList.vue'
+import type { CommentItem } from '@/data/mockData'
+
+const props = withDefaults(
+  defineProps<{
+    comments: CommentItem[]
+    imageOnly?: boolean
+    rating?: number | null
+  }>(),
+  {
+    imageOnly: false,
+    rating: null,
+  },
+)
+
+const emit = defineEmits<{
+  reply: [comment: CommentItem]
+  pin: [commentId: string]
+  remove: [commentId: string]
+  toggleImageOnly: []
+  setRating: [rating: number | null]
+}>()
+</script>

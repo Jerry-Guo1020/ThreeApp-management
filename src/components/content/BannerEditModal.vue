@@ -1,54 +1,3 @@
-<script setup lang="ts">
-import { ref, watch } from 'vue'
-import { Save, X } from '@lucide/vue'
-
-import UploadGrid from '@/components/common/UploadGrid.vue'
-import type { ContentCard } from '@/data/mockData'
-import type { SaveBannerPayload } from '@/stores/banners'
-
-const props = defineProps<{
-  open: boolean
-  banner?: ContentCard | null
-}>()
-
-const emit = defineEmits<{
-  close: []
-  save: [payload: SaveBannerPayload]
-}>()
-
-const title = ref('')
-const description = ref('')
-const status = ref<'published' | 'draft' | 'hidden'>('published')
-const imageName = ref('')
-
-watch(
-  () => props.banner,
-  (banner) => {
-    title.value = banner?.title ?? ''
-    description.value = banner?.description ?? ''
-    status.value = (banner?.status === 'scheduled' ? 'draft' : banner?.status ?? 'published') as 'published' | 'draft' | 'hidden'
-    imageName.value = banner?.imageName ?? ''
-  },
-  { immediate: true },
-)
-
-function handleSelected(fileNames: string[]) {
-  imageName.value = fileNames[0] ?? imageName.value
-}
-
-function submit() {
-  if (!props.banner) return
-
-  emit('save', {
-    id: props.banner.id,
-    title: title.value,
-    description: description.value,
-    status: status.value,
-    imageName: imageName.value,
-  })
-}
-</script>
-
 <template>
   <div v-if="props.open && props.banner" class="fixed inset-0 z-50 grid place-items-center bg-slate-950/35 p-4" @click.self="emit('close')">
     <section class="w-full max-w-xl rounded-lg bg-white shadow-2xl">
@@ -123,3 +72,54 @@ function submit() {
     </section>
   </div>
 </template>
+
+<script setup lang="ts">
+import { ref, watch } from 'vue'
+import { Save, X } from '@lucide/vue'
+
+import UploadGrid from '@/components/common/UploadGrid.vue'
+import type { ContentCard } from '@/data/mockData'
+import type { SaveBannerPayload } from '@/stores/banners'
+
+const props = defineProps<{
+  open: boolean
+  banner?: ContentCard | null
+}>()
+
+const emit = defineEmits<{
+  close: []
+  save: [payload: SaveBannerPayload]
+}>()
+
+const title = ref('')
+const description = ref('')
+const status = ref<'published' | 'draft' | 'hidden'>('published')
+const imageName = ref('')
+
+watch(
+  () => props.banner,
+  (banner) => {
+    title.value = banner?.title ?? ''
+    description.value = banner?.description ?? ''
+    status.value = (banner?.status === 'scheduled' ? 'draft' : banner?.status ?? 'published') as 'published' | 'draft' | 'hidden'
+    imageName.value = banner?.imageName ?? ''
+  },
+  { immediate: true },
+)
+
+function handleSelected(fileNames: string[]) {
+  imageName.value = fileNames[0] ?? imageName.value
+}
+
+function submit() {
+  if (!props.banner) return
+
+  emit('save', {
+    id: props.banner.id,
+    title: title.value,
+    description: description.value,
+    status: status.value,
+    imageName: imageName.value,
+  })
+}
+</script>

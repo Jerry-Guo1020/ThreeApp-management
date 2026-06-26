@@ -1,1 +1,1 @@
-export type { CommentItem, CommentSummary } from '@/data/mockData'
+export type { BusinessType, CommentItem, CommentSummary } from '@/data/mockData'
