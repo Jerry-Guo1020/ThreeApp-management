@@ -56,4 +56,5 @@ jobs:
               mkdir -p "$APP_DIR"
               rm -rf "$APP_DIR"/*
               tar -xzf /tmp/threeapp-management.tar.gz -C "$APP_DIR"
+              chown -R caddy:caddy "$APP_DIR"
           EOF
