@@ -9,6 +9,11 @@ import type {
   ProductType,
 } from '@/types/product'
 import { readStorage, writeStorage } from './persistence'
+import {
+  getPreviewProductCategories,
+  getPreviewProducts,
+  isPreviewSessionActive,
+} from './preview'
 import { getErrorMessage, requestData } from '@/utils/request'
 
 const PRODUCT_STORAGE_KEY = 'threeapp-products'
@@ -67,6 +72,18 @@ export const productCategoryState = ref<Record<ProductType, ProductCategoryOptio
 
 function persistProducts() {
   writeStorage(PRODUCT_STORAGE_KEY, productState.value)
+}
+
+function applyPreviewProductState(message?: string) {
+  productState.value = getPreviewProducts()
+  productCategoryState.value = {
+    wine: getPreviewProductCategories('wine'),
+    specialty: getPreviewProductCategories('specialty'),
+  }
+  persistProducts()
+  if (message) {
+    productError.value = message
+  }
 }
 
 function cloneProduct(product: Product): Product {
@@ -245,6 +262,15 @@ async function fetchProductDetail(id: string) {
 }
 
 export async function fetchProductCategories(type: ProductType) {
+  if (isPreviewSessionActive()) {
+    const categories = getPreviewProductCategories(type)
+    productCategoryState.value = {
+      ...productCategoryState.value,
+      [type]: categories,
+    }
+    return categories
+  }
+
   const data = await requestData<Array<{ key?: string; name?: string; type?: ProductType; sort?: number }>>(`/api/product-categories?type=${type}`, {
     auth: false,
   })
@@ -274,6 +300,12 @@ export async function fetchProducts() {
   productLoading.value = true
   productError.value = ''
 
+  if (isPreviewSessionActive()) {
+    applyPreviewProductState()
+    productLoading.value = false
+    return
+  }
+
   try {
     const [wineResponse, specialtyResponse] = await Promise.all([
       requestData<{ items: ProductApiItem[]; total: number }>('/api/admin/products?type=wine'),
@@ -288,7 +320,12 @@ export async function fetchProducts() {
     productState.value = detailItems.map(mapProduct).sort((left, right) => left.type.localeCompare(right.type) || left.sort - right.sort)
     persistProducts()
   } catch (error) {
-    productError.value = getErrorMessage(error)
+    const message = getErrorMessage(error, '商品数据读取失败，已展示本地预览内容。')
+    if (productState.value.length) {
+      productError.value = message
+    } else {
+      applyPreviewProductState(message)
+    }
   } finally {
     productLoading.value = false
   }
@@ -303,6 +340,48 @@ export function getStoredProductById(id: string) {
 }
 
 export async function saveStoredProduct(payload: SaveProductPayload) {
+  if (isPreviewSessionActive()) {
+    const existingProduct = payload.id ? getStoredProductById(payload.id) : undefined
+    const selectedCategory = getStoredProductCategories(payload.type).find((item) => item.key === payload.categoryKey)
+    const resolvedCategoryName = selectedCategory?.name ?? (payload.categoryKey || 'null')
+    const nextProduct = updateProductMedia(
+      {
+        id: payload.id ?? `${payload.type}-${Date.now()}`,
+        type: payload.type,
+        name: payload.title.trim() || 'null',
+        subtitle: payload.subtitle.trim() || 'null',
+        category: resolvedCategoryName,
+        categoryKey: payload.categoryKey,
+        categoryName: resolvedCategoryName,
+        scene: payload.origin.trim() || payload.brand.trim() || 'null',
+        tag: payload.badge.trim() || payload.tags[0]?.trim() || 'null',
+        tagTone: payload.type === 'specialty' ? 'teal' : 'amber',
+        comments: existingProduct?.comments ?? 0,
+        replies: existingProduct?.replies ?? 0,
+        status: payload.status,
+        sort: Number(payload.sort) || 1,
+        imageTone: existingProduct?.imageTone ?? getImageTone(payload.type),
+        description: payload.description.trim() || 'null',
+        detailImages: existingProduct?.detailImages ?? [],
+        slug: payload.slug?.trim() || existingProduct?.slug || '',
+        brand: payload.brand.trim(),
+        origin: payload.origin.trim(),
+        coverUrl: payload.coverUrl.trim(),
+        badge: payload.badge.trim(),
+        tags: payload.tags.map((item) => item.trim()).filter(Boolean),
+        galleryUrls: payload.galleryUrls.map((item) => item.trim()).filter(Boolean),
+        specs: existingProduct?.specs ?? [],
+        sections: existingProduct?.sections ?? [],
+        linkUrl: existingProduct?.linkUrl ?? '',
+      },
+      payload.galleryUrls,
+    )
+
+    upsertProduct(nextProduct)
+    persistProducts()
+    return nextProduct
+  }
+
   productError.value = ''
   const body = buildProductPayload(payload)
   const data = payload.id
@@ -322,6 +401,12 @@ export async function saveStoredProduct(payload: SaveProductPayload) {
 }
 
 export async function deleteStoredProduct(productId: string) {
+  if (isPreviewSessionActive()) {
+    productState.value = productState.value.filter((product) => product.id !== productId)
+    persistProducts()
+    return
+  }
+
   productError.value = ''
   await requestData<{ id: string | number; deleted: boolean }>(`/api/admin/products/${productId}`, {
     method: 'DELETE',
@@ -350,6 +435,10 @@ export async function reorderStoredProducts(type: ProductType, fromId: string, t
     return { ...product, sort: orderMap.get(product.id) ?? product.sort }
   })
   persistProducts()
+
+  if (isPreviewSessionActive()) {
+    return getStoredProductsByType(type)
+  }
 
   try {
     const updatedItems = await Promise.all(

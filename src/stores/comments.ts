@@ -4,6 +4,7 @@ import type { ProductType } from '@/data/mockData'
 import type { CommentItem, CommentSummary } from '@/types/comment'
 import { getStoredProductsByType } from './products'
 import { readStorage, writeStorage } from './persistence'
+import { getPreviewCommentsByProduct, isPreviewSessionActive } from './preview'
 import { getErrorMessage, requestData } from '@/utils/request'
 
 interface ReviewApiItem {
@@ -51,6 +52,20 @@ export async function fetchCommentsForProduct(productId: string) {
   commentLoading.value = true
   commentError.value = ''
 
+  if (isPreviewSessionActive()) {
+    const nextComments = getPreviewCommentsByProduct(productId)
+    commentState.value = [
+      ...commentState.value.filter((comment) => comment.productId !== productId),
+      ...nextComments,
+    ]
+    persistComments()
+    commentLoading.value = false
+    return {
+      items: nextComments,
+      total: nextComments.filter((comment) => !comment.deleted).length,
+    }
+  }
+
   try {
     const data = await requestData<{ summary?: ReviewSummaryApi; items: ReviewApiItem[] }>(`/api/admin/reviews/products/${productId}`)
     const nextComments = Array.isArray(data.items) ? data.items.map((item) => mapComment(productId, item)) : []
@@ -64,12 +79,17 @@ export async function fetchCommentsForProduct(productId: string) {
       total: Number(data.summary?.commentCount ?? nextComments.length ?? 0) || 0,
     }
   } catch (error) {
-    commentState.value = commentState.value.filter((comment) => comment.productId !== productId)
+    const message = getErrorMessage(error, '评论数据读取失败，已展示本地预览内容。')
+    const fallbackComments = getPreviewCommentsByProduct(productId)
+    commentState.value = [
+      ...commentState.value.filter((comment) => comment.productId !== productId),
+      ...fallbackComments,
+    ]
     persistComments()
-    commentError.value = getErrorMessage(error)
+    commentError.value = message
     return {
-      items: [] as CommentItem[],
-      total: 0,
+      items: fallbackComments,
+      total: fallbackComments.filter((comment) => !comment.deleted).length,
     }
   } finally {
     commentLoading.value = false
@@ -81,6 +101,18 @@ export function getStoredCommentsByProduct(productId: string) {
 }
 
 export async function replyToStoredComment(commentId: string, reply: string) {
+  if (isPreviewSessionActive()) {
+    commentState.value = commentState.value.map((comment) => {
+      if (comment.id !== commentId) return comment
+      return {
+        ...comment,
+        reply,
+      }
+    })
+    persistComments()
+    return
+  }
+
   const data = await requestData<ReviewApiItem>(`/api/admin/reviews/${commentId}/reply`, {
     method: 'PATCH',
     body: JSON.stringify({ replyContent: reply }),
@@ -94,6 +126,16 @@ export async function replyToStoredComment(commentId: string, reply: string) {
 }
 
 export async function togglePinnedStoredComment(productId: string, commentId: string) {
+  if (isPreviewSessionActive()) {
+    commentState.value = commentState.value.map((comment) => {
+      if (comment.productId !== productId) return comment
+      if (comment.id !== commentId) return { ...comment, pinned: false }
+      return { ...comment, pinned: !comment.pinned }
+    })
+    persistComments()
+    return
+  }
+
   const current = commentState.value.find((comment) => comment.id === commentId)
   const data = await requestData<ReviewApiItem>(`/api/admin/reviews/${commentId}/pin`, {
     method: 'PATCH',
@@ -109,6 +151,12 @@ export async function togglePinnedStoredComment(productId: string, commentId: st
 }
 
 export async function deleteStoredComment(commentId: string) {
+  if (isPreviewSessionActive()) {
+    commentState.value = commentState.value.map((comment) => (comment.id === commentId ? { ...comment, deleted: true, pinned: false } : comment))
+    persistComments()
+    return
+  }
+
   await requestData<{ id: string | number; deleted: boolean }>(`/api/admin/reviews/${commentId}`, {
     method: 'DELETE',
   })

@@ -12,6 +12,7 @@
           <form class="w-full max-w-sm space-y-5" @submit.prevent="submit">
             <div>
               <h2 class="text-2xl font-black text-slate-950">管理员登录</h2>
+              <p class="mt-2 text-sm leading-6 text-slate-500">当前先开放预览登录，接口不可用时会自动进入本地演示后台。</p>
             </div>
 
             <label class="block">
@@ -30,13 +31,19 @@
               </span>
             </label>
 
+            <div class="rounded-lg bg-slate-50 px-4 py-3 text-xs leading-6 text-slate-500 ring-1 ring-slate-200">
+              预览账号：{{ previewDefaults.username }}
+              <br />
+              预览密码：{{ previewDefaults.password }}
+            </div>
+
             <p v-if="loginError" class="rounded-lg bg-rose-50 px-3 py-2 text-sm font-bold text-rose-700 ring-1 ring-rose-100">
               {{ loginError }}
             </p>
 
             <button class="btn-primary w-full" type="submit" :disabled="authLoading">
               <LogIn class="size-4" />
-              {{ authLoading ? '登录中...' : '登录' }}
+              {{ authLoading ? '登录中...' : '进入后台' }}
             </button>
           </form>
         </section>
@@ -54,11 +61,13 @@ import { KeyRound, LogIn, Mail } from '@lucide/vue'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
+import { PREVIEW_LOGIN_DEFAULTS } from '@/stores/preview'
 import { authenticateUser, authLoading } from '@/stores/user'
 
 const router = useRouter()
-const account = ref('admin')
-const password = ref('admin123456')
+const previewDefaults = PREVIEW_LOGIN_DEFAULTS
+const account = ref(previewDefaults.username)
+const password = ref(previewDefaults.password)
 const loginError = ref('')
 
 async function submit() {
@@ -69,7 +78,7 @@ async function submit() {
     return
   }
 
-  loginError.value = ''
+  loginError.value = result.mode === 'preview' ? result.message : ''
   await router.push('/dashboard')
 }
 </script>

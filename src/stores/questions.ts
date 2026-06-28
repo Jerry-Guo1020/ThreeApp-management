@@ -2,6 +2,7 @@ import { ref } from 'vue'
 
 import type { BusinessType } from '@/types/comment'
 import { readStorage, writeStorage } from './persistence'
+import { getPreviewQuestions, isPreviewSessionActive } from './preview'
 import { getErrorMessage, requestData } from '@/utils/request'
 
 export interface QuestionRecord {
@@ -38,6 +39,14 @@ function persistQuestions() {
   writeStorage(QUESTION_STORAGE_KEY, questionState.value)
 }
 
+function applyPreviewQuestions(message?: string) {
+  questionState.value = getPreviewQuestions()
+  persistQuestions()
+  if (message) {
+    questionError.value = message
+  }
+}
+
 function toBusinessType(value: unknown): BusinessType {
   return value === 'specialty' || value === 'cold-storage' ? value : 'wine'
 }
@@ -64,14 +73,23 @@ export async function fetchQuestions() {
   questionLoading.value = true
   questionError.value = ''
 
+  if (isPreviewSessionActive()) {
+    applyPreviewQuestions()
+    questionLoading.value = false
+    return
+  }
+
   try {
     const data = await requestData<{ items: InquiryApiItem[]; total: number }>('/api/admin/inquiries')
     questionState.value = Array.isArray(data.items) ? data.items.map(mapQuestion) : []
     persistQuestions()
   } catch (error) {
-    questionState.value = []
-    persistQuestions()
-    questionError.value = getErrorMessage(error)
+    const message = getErrorMessage(error, '问答数据读取失败，已展示本地预览内容。')
+    if (questionState.value.length) {
+      questionError.value = message
+    } else {
+      applyPreviewQuestions(message)
+    }
   } finally {
     questionLoading.value = false
   }
@@ -82,6 +100,22 @@ export function getStoredQuestionById(id: string) {
 }
 
 export async function replyToStoredQuestion(id: string, reply: string) {
+  if (isPreviewSessionActive()) {
+    const nextQuestion = questionState.value.find((question) => question.id === id)
+    if (!nextQuestion) {
+      throw new Error('未找到当前问答。')
+    }
+
+    const updatedQuestion = {
+      ...nextQuestion,
+      reply,
+      status: 'replied' as const,
+    }
+    questionState.value = questionState.value.map((question) => (question.id === id ? updatedQuestion : question))
+    persistQuestions()
+    return updatedQuestion
+  }
+
   const data = await requestData<InquiryApiItem>(`/api/admin/inquiries/${id}/reply`, {
     method: 'PATCH',
     body: JSON.stringify({ replyContent: reply }),

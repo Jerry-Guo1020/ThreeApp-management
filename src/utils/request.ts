@@ -22,7 +22,7 @@ function trimTrailingSlash(value: string) {
 
 export function getApiBaseUrl() {
   const envValue = import.meta.env.VITE_API_BASE_URL?.trim()
-  return envValue ? trimTrailingSlash(envValue) : 'http://localhost:30001'
+  return envValue ? trimTrailingSlash(envValue) : 'http://111.228.49.228:33060'
 }
 
 function buildUrl(path: string) {

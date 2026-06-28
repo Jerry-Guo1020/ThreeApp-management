@@ -39,7 +39,7 @@
             当前登录用户：{{ currentUserName }}
             <div class="mt-2"><StatusBadge :status="canManageUsers ? 'published' : 'draft'" :label="canManageUsers ? '管理员权限' : '普通用户权限'" /></div>
           </div>
-          <p>当前这页已经切到真实登录态数据。</p>
+          <p>{{ sessionHint }}</p>
           <p>后台用户增删改接口这轮还没有正式开放，所以这里先只读展示，避免假操作。</p>
           <p>等服务器地址、数据库和后台管理接口全部敲定后，再继续补齐用户管理动作。</p>
         </div>
@@ -58,7 +58,7 @@ import AppToast from '@/components/common/AppToast.vue'
 import PageToolbar from '@/components/common/PageToolbar.vue'
 import StatusBadge from '@/components/common/StatusBadge.vue'
 import { roleLabels } from '@/data/mockData'
-import { currentUser, isAdminUser, userAccountState } from '@/stores/user'
+import { currentUser, isAdminUser, isPreviewMode, userAccountState } from '@/stores/user'
 
 const toastOpen = computed(() => false)
 const toastTone = computed(() => 'error' as const)
@@ -68,4 +68,7 @@ const toastMessage = computed(() => '')
 const canManageUsers = computed(() => isAdminUser())
 const users = computed(() => userAccountState.value)
 const currentUserName = computed(() => currentUser.value?.name ?? '未登录')
+const sessionHint = computed(() =>
+  isPreviewMode.value ? '当前正在使用本地预览会话，方便先查看后台页面和开发进度。' : '当前这页已经接入真实后台登录态。',
+)
 </script>
