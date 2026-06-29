@@ -67,8 +67,6 @@ const filteredQuestions = computed(() => {
 })
 
 onMounted(() => {
-  if (!questionState.value.length) {
-    void fetchQuestions()
-  }
+  void fetchQuestions()
 })
 </script>

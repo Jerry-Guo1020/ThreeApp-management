@@ -202,11 +202,7 @@ const liveMetrics = computed(() =>
 )
 
 onMounted(() => {
-  if (!wineProducts.value.length && !specialtyProducts.value.length) {
-    void fetchProducts()
-  }
-  if (!questionState.value.length) {
-    void fetchQuestions()
-  }
+  void fetchProducts()
+  void fetchQuestions()
 })
 </script>

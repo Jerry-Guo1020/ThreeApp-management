@@ -4,6 +4,7 @@ import { setAuthenticated } from './app'
 import { readStorage, removeStorage, writeStorage } from './persistence'
 import {
   PREVIEW_LOGIN_DEFAULTS,
+  clearPreviewWorkspace,
   getPreviewUserAccounts,
   isPreviewSessionActive,
   seedPreviewWorkspace,
@@ -140,6 +141,7 @@ export async function authenticateUser(username: string, password: string) {
       body: JSON.stringify({ username, password }),
     })
 
+    clearPreviewWorkspace()
     const nextUser = toUser(response.data.admin)
     persistSession('remote', response.data.token, nextUser)
 
@@ -182,6 +184,7 @@ export async function hydrateCurrentUser() {
 
   try {
     const response = await request<any>('/api/admin/auth/me')
+    clearPreviewWorkspace()
     persistSession('remote', token, toUser(response.data))
   } catch (error) {
     const message = getErrorMessage(error, '登录态校验失败，已切换到本地预览模式。')

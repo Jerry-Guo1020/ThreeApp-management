@@ -9,7 +9,7 @@ import {
 import type { Product as SeedProduct, ProductType, UserAccount } from '@/data/mockData'
 import type { Product, ProductCategoryOption } from '@/types/product'
 
-import { cloneSeed, readStorage, writeStorage } from './persistence'
+import { cloneSeed, readStorage, removeStorage, writeStorage } from './persistence'
 
 export type SessionMode = 'remote' | 'preview'
 
@@ -24,6 +24,14 @@ const QUESTION_STORAGE_KEY = 'threeapp-questions'
 const COMMENT_STORAGE_KEY = 'threeapp-comments'
 const UPDATE_STORAGE_KEY = 'threeapp-updates'
 const BANNER_STORAGE_KEY = 'threeapp-home-banners'
+
+const PREVIEW_STORAGE_KEYS = [
+  PRODUCT_STORAGE_KEY,
+  QUESTION_STORAGE_KEY,
+  COMMENT_STORAGE_KEY,
+  UPDATE_STORAGE_KEY,
+  BANNER_STORAGE_KEY,
+] as const
 
 const previewImagePalettes: Record<ProductType, { cover: [string, string]; detail: Array<[string, string]> }> = {
   wine: {
@@ -69,6 +77,10 @@ export function setStoredSessionMode(mode: SessionMode | null) {
 
 export function isPreviewSessionActive() {
   return getStoredSessionMode() === 'preview'
+}
+
+export function clearPreviewWorkspace() {
+  PREVIEW_STORAGE_KEYS.forEach((key) => removeStorage(key))
 }
 
 function escapeSvgText(value: string) {

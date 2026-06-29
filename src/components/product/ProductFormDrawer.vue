@@ -24,10 +24,7 @@
           <div class="grid grid-cols-2 gap-3">
             <div>
               <label class="mb-2 block text-sm font-bold text-slate-700">{{ isWine ? '风味类型' : '分类' }}</label>
-              <select v-model="form.categoryKey" class="input-field">
-                <option value="">请选择分类</option>
-                <option v-for="item in categories" :key="item.key" :value="item.key">{{ item.name }}</option>
-              </select>
+              <input v-model="form.categoryKey" class="input-field" :placeholder="isWine ? '请输入风味类型' : '请输入分类'" />
             </div>
             <div>
               <label class="mb-2 block text-sm font-bold text-slate-700">{{ isWine ? '使用场景' : '地区 / 产地' }}</label>
@@ -129,7 +126,7 @@ import UploadGrid from '@/components/common/UploadGrid.vue'
 import { mockUpload } from '@/api/upload'
 import type { Product, ProductType } from '@/types/product'
 import { productTypeLabels } from '@/data/mockData'
-import { deleteStoredProduct, fetchProductCategories, getStoredProductCategories, getStoredProductsByType, saveStoredProduct } from '@/stores/products'
+import { deleteStoredProduct, getStoredProductsByType, saveStoredProduct } from '@/stores/products'
 import { getErrorMessage } from '@/utils/request'
 
 interface ProductFormState {
@@ -172,7 +169,6 @@ const toastMessage = ref('')
 
 const isWine = computed(() => props.type === 'wine')
 const title = computed(() => `${props.product ? '编辑' : '新增'}${productTypeLabels[props.type]}商品`)
-const categories = computed(() => getStoredProductCategories(props.type))
 
 function createEmptyForm(): ProductFormState {
   const nextSort = getStoredProductsByType(props.type).length + 1
@@ -263,17 +259,6 @@ function handleGallerySelected(fileNames: string[]) {
   }
 }
 
-async function ensureCategories() {
-  try {
-    await fetchProductCategories(props.type)
-    if (!form.value.categoryKey) {
-      form.value.categoryKey = categories.value[0]?.key ?? ''
-    }
-  } catch (error) {
-    openToast('error', '分类读取失败', getErrorMessage(error))
-  }
-}
-
 async function handleSubmit() {
   saving.value = true
 
@@ -287,7 +272,7 @@ async function handleSubmit() {
     }
 
     if (!form.value.categoryKey.trim()) {
-      openToast('error', '保存失败', '请先选择商品分类。')
+      openToast('error', '保存失败', isWine.value ? '请先填写风味类型。' : '请先填写商品分类。')
       return
     }
 
@@ -346,7 +331,6 @@ watch(
   ([open]) => {
     if (!open) return
     form.value = createFormFromProduct(props.product)
-    void ensureCategories()
   },
   { immediate: true },
 )

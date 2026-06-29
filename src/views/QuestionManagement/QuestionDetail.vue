@@ -132,8 +132,6 @@ async function submitReply() {
 }
 
 onMounted(() => {
-  if (!question.value) {
-    void fetchQuestions()
-  }
+  void fetchQuestions()
 })
 </script>

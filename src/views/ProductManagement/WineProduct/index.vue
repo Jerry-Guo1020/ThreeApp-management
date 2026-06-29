@@ -139,8 +139,6 @@ async function handleDrop(targetId: string) {
 }
 
 onMounted(() => {
-  if (!products.value.length) {
-    void fetchProducts()
-  }
+  void fetchProducts()
 })
 </script>

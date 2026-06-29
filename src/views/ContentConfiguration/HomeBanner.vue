@@ -122,8 +122,6 @@ async function handleSave(payload: Parameters<typeof saveStoredBanner>[0]) {
 }
 
 onMounted(() => {
-  if (!banners.value.length) {
-    void fetchBanners()
-  }
+  void fetchBanners()
 })
 </script>
