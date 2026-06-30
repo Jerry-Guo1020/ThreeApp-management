@@ -315,7 +315,7 @@
                     <UploadGrid
                       compact
                       title="上传案例封面"
-                      hint="前端联调阶段：模拟 MinIO 地址回填，正式接入后改为真实上传"
+                      hint="选择图片后会上传到 MinIO 并回填地址"
                       :current-label="projectForm.coverUrl"
                       :multiple="false"
                       @selected="handleCoverSelected"
@@ -375,7 +375,7 @@
                   <div class="mt-4 grid gap-4 xl:grid-cols-[320px_minmax(0,1fr)]">
                     <UploadGrid
                       title="上传项目图集"
-                      hint="支持多图上传；当前为前端联调，模拟生成 MinIO 地址与数据库回填结果"
+                      hint="支持多图上传；上传成功后会回填 MinIO 地址"
                       :current-label="`${projectForm.gallery.length} 张图`"
                       @selected="handleGallerySelected"
                     />
@@ -431,7 +431,7 @@
 
           <footer class="flex flex-col gap-3 border-t border-slate-200 p-5 sm:flex-row sm:justify-end">
             <button class="btn-secondary sm:w-auto" type="button" :disabled="submitting" @click="closeDialog">取消</button>
-            <button class="btn-primary sm:w-auto" type="button" :disabled="submitting" @click="saveProject">
+            <button class="btn-primary sm:w-auto" type="button" :disabled="submitting || uploadingMedia" @click="saveProject">
               <Save class="size-4" />
               {{ isEditing ? '保存项目内容' : '新增并保存' }}
             </button>
@@ -467,7 +467,7 @@ import DataTable from '@/components/common/DataTable.vue'
 import PageToolbar from '@/components/common/PageToolbar.vue'
 import StatusBadge from '@/components/common/StatusBadge.vue'
 import UploadGrid from '@/components/common/UploadGrid.vue'
-import { mockUpload } from '@/api/upload'
+import { uploadImage } from '@/api/upload'
 import {
   coldProjectError,
   coldProjectLoading,
@@ -525,6 +525,7 @@ const editOpen = ref(false)
 const editMode = ref<'create' | 'edit'>('edit')
 const keyword = ref('')
 const submitting = ref(false)
+const uploadingMedia = ref(false)
 const projects = ref<ColdProjectEditor[]>(getStoredColdProjects())
 const projectForm = ref<ColdProjectFormState>(createEmptyForm())
 const projectFormCaseLabel = computed(() => getProjectCaseLabel(projectForm.value.sort))
@@ -870,38 +871,62 @@ async function moveProject(projectId: number, direction: 'up' | 'down') {
   }
 }
 
-function handleCoverSelected(fileNames: string[]) {
+async function handleCoverSelected(fileNames: string[], files: File[] = []) {
   const [fileName] = fileNames
   if (!fileName) {
     return
   }
 
-  const uploadResult = mockUpload(fileName)
-  projectForm.value.coverUrl = `https://minio.example.com/threevine/cold/${uploadResult.fileName}`
-  openToast('success', '封面已写入模拟存储', '当前为前端联调阶段：已模拟上传到 MinIO，并将回填地址作为后续写入 MySQL 的值。')
+  const [file] = files
+  if (!file) {
+    openToast('error', '上传失败', '浏览器没有拿到本地文件对象，请重新选择图片。')
+    return
+  }
+
+  uploadingMedia.value = true
+  try {
+    const uploadResult = await uploadImage(file, 'cold/cover')
+    projectForm.value.coverUrl = uploadResult.publicUrl
+    openToast('success', '封面已上传', '图片已上传到 MinIO，并将可访问地址回填到封面图地址。')
+  } catch (error) {
+    openToast('error', '封面上传失败', getErrorMessage(error))
+  } finally {
+    uploadingMedia.value = false
+  }
 }
 
-function handleGallerySelected(fileNames: string[]) {
+async function handleGallerySelected(fileNames: string[], files: File[] = []) {
   if (!fileNames.length) {
     return
   }
 
-  const nextGallery = fileNames.map((fileName, index) => {
-    const uploadResult = mockUpload(fileName)
-    const sort = projectForm.value.gallery.length + index + 1
-    const storageUrl = `https://minio.example.com/threevine/cold/${uploadResult.fileName}`
-    return {
-      id: `gallery-upload-${Date.now()}-${index}`,
-      fileName: uploadResult.fileName,
-      storageUrl,
-      databaseUrl: storageUrl,
-      sort,
-      persisted: true,
-    } satisfies ColdProjectGalleryItem
-  })
+  if (!files.length) {
+    openToast('error', '上传失败', '浏览器没有拿到本地文件对象，请重新选择图片。')
+    return
+  }
 
-  projectForm.value.gallery.push(...nextGallery)
-  openToast('success', '图集地址已生成', '当前会先模拟 MinIO 地址回填，真实联调时这里会改为“上传 MinIO -> 获取 URL -> 落 MySQL”。')
+  uploadingMedia.value = true
+  try {
+    const uploadResults = await Promise.all(files.map((file) => uploadImage(file, 'cold/gallery')))
+    const nextGallery = uploadResults.map((uploadResult, index) => {
+      const sort = projectForm.value.gallery.length + index + 1
+      return {
+        id: `gallery-upload-${Date.now()}-${index}`,
+        fileName: uploadResult.fileName,
+        storageUrl: uploadResult.publicUrl,
+        databaseUrl: uploadResult.publicUrl,
+        sort,
+        persisted: true,
+      } satisfies ColdProjectGalleryItem
+    })
+
+    projectForm.value.gallery.push(...nextGallery)
+    openToast('success', '图集已上传', `已上传 ${nextGallery.length} 张图片到 MinIO，并回填到项目图集。`)
+  } catch (error) {
+    openToast('error', '图集上传失败', getErrorMessage(error))
+  } finally {
+    uploadingMedia.value = false
+  }
 }
 
 function removeGalleryImage(galleryId: string) {

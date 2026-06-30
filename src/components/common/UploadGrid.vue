@@ -44,7 +44,7 @@ const props = withDefaults(
 )
 
 const emit = defineEmits<{
-  selected: [fileNames: string[]]
+  selected: [fileNames: string[], files: File[]]
 }>()
 
 const inputRef = ref<HTMLInputElement | null>(null)
@@ -62,8 +62,9 @@ function openLocalPicker() {
 
 function handleFileChange(event: Event) {
   const target = event.target as HTMLInputElement
-  const fileNames = Array.from(target.files ?? []).map((file) => file.name)
+  const files = Array.from(target.files ?? [])
+  const fileNames = files.map((file) => file.name)
   selectedNames.value = fileNames
-  emit('selected', fileNames)
+  emit('selected', fileNames, files)
 }
 </script>

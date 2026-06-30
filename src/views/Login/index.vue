@@ -12,7 +12,7 @@
           <form class="w-full max-w-sm space-y-5" @submit.prevent="submit">
             <div>
               <h2 class="text-2xl font-black text-slate-950">管理员登录</h2>
-              <p class="mt-2 text-sm leading-6 text-slate-500">当前先开放预览登录，接口不可用时会自动进入本地演示后台。</p>
+              <p class="mt-2 text-sm leading-6 text-slate-500">当前支持真实后台登录；仅在服务暂时不可用时才会进入本地预览后台。</p>
             </div>
 
             <label class="block">
@@ -71,6 +71,8 @@ const password = ref(previewDefaults.password)
 const loginError = ref('')
 
 async function submit() {
+  loginError.value = ''
+
   const result = await authenticateUser(account.value, password.value)
 
   if (!result.ok) {

@@ -11,7 +11,7 @@ import {
   setStoredSessionMode,
   type SessionMode,
 } from './preview'
-import { getErrorMessage, request, setAdminToken } from '@/utils/request'
+import { getErrorMessage, RequestError, request, setAdminToken } from '@/utils/request'
 
 export interface AdminUser {
   id: string
@@ -124,11 +124,16 @@ function activatePreviewSession(username: string, message: string) {
   }
 }
 
+function isServiceUnavailableError(error: unknown) {
+  if (error instanceof RequestError) {
+    return error.status === undefined || error.status === 404 || error.status >= 500
+  }
+
+  return error instanceof TypeError
+}
+
 const storedToken = typeof window === 'undefined' ? '' : window.localStorage.getItem(TOKEN_STORAGE_KEY) ?? ''
 setAdminToken(storedToken)
-if (storedToken && currentUser.value) {
-  setAuthenticated(true)
-}
 
 export async function authenticateUser(username: string, password: string) {
   authLoading.value = true
@@ -151,8 +156,20 @@ export async function authenticateUser(username: string, password: string) {
       mode: 'remote' as const,
     }
   } catch (error) {
-    const message = getErrorMessage(error, '登录服务暂时不可用，已切换到本地预览模式。')
-    return activatePreviewSession(username, message)
+    if (isServiceUnavailableError(error)) {
+      const message = getErrorMessage(error, '登录服务暂时不可用，已切换到本地预览模式。')
+      return activatePreviewSession(username, message)
+    }
+
+    persistSession('remote', '', null)
+    const message = getErrorMessage(error, '登录失败，请检查账号和密码。')
+    authError.value = message
+
+    return {
+      ok: false as const,
+      mode: 'remote' as const,
+      message,
+    }
   } finally {
     authLoading.value = false
   }
@@ -161,10 +178,11 @@ export async function authenticateUser(username: string, password: string) {
 export async function hydrateCurrentUser() {
   const token = typeof window === 'undefined' ? '' : window.localStorage.getItem(TOKEN_STORAGE_KEY) ?? ''
   const previewMode = isPreviewSessionActive()
+  const previewUsername = currentUser.value?.email ?? PREVIEW_LOGIN_DEFAULTS.username
 
   if (!token) {
     if (previewMode) {
-      activatePreviewSession(PREVIEW_LOGIN_DEFAULTS.username, '当前正在使用本地预览模式。')
+      activatePreviewSession(previewUsername, '当前正在使用本地预览模式。')
       return
     }
 
@@ -175,9 +193,11 @@ export async function hydrateCurrentUser() {
   setAdminToken(token)
   authLoading.value = true
   authError.value = ''
+  setAuthenticated(false)
+  currentUser.value = null
 
   if (previewMode || token === PREVIEW_TOKEN) {
-    activatePreviewSession(currentUser.value?.email ?? PREVIEW_LOGIN_DEFAULTS.username, '当前正在使用本地预览模式。')
+    activatePreviewSession(previewUsername, '当前正在使用本地预览模式。')
     authLoading.value = false
     return
   }
@@ -187,8 +207,8 @@ export async function hydrateCurrentUser() {
     clearPreviewWorkspace()
     persistSession('remote', token, toUser(response.data))
   } catch (error) {
-    const message = getErrorMessage(error, '登录态校验失败，已切换到本地预览模式。')
-    activatePreviewSession(currentUser.value?.email ?? PREVIEW_LOGIN_DEFAULTS.username, message)
+    persistSession('remote', '', null)
+    authError.value = getErrorMessage(error, '登录态校验失败，请重新登录。')
   } finally {
     authLoading.value = false
   }

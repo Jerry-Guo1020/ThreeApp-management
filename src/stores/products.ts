@@ -49,7 +49,7 @@ export interface SaveProductPayload {
   type: ProductType
   title: string
   subtitle: string
-  categoryKey: string
+  category: string
   brand: string
   origin: string
   description: string
@@ -210,12 +210,14 @@ function mapProduct(item: ProductApiItem): Product {
 }
 
 function buildProductPayload(payload: SaveProductPayload) {
+  const resolvedCategoryKey = resolveProductCategoryKey(payload.type, payload.category)
   const coverUrl = payload.coverUrl.trim()
   const galleryUrls = normalizeGalleryUrls(coverUrl, payload.galleryUrls)
 
   return {
     type: payload.type,
-    categoryKey: payload.categoryKey.trim(),
+    categoryKey: resolvedCategoryKey,
+    categoryName: payload.category.trim() || undefined,
     slug: payload.slug?.trim() || undefined,
     title: payload.title.trim(),
     subtitle: payload.subtitle.trim(),
@@ -231,6 +233,47 @@ function buildProductPayload(payload: SaveProductPayload) {
     status: toApiStatus(payload.status),
     sort: Number(payload.sort) || 1,
   }
+}
+
+function resolveProductCategoryKey(type: ProductType, category: string) {
+  const normalizedCategory = category.trim()
+  const categories = getStoredProductCategories(type)
+  const matchedCategory = categories.find((item) => item.name === normalizedCategory || item.key === normalizedCategory)
+  return matchedCategory?.key ?? normalizedCategory
+}
+
+function syncProductCategoryOption(type: ProductType, categoryKey: string, categoryName: string) {
+  const key = categoryKey.trim()
+  const name = categoryName.trim()
+  if (!key || !name) return
+
+  const existingCategories = getStoredProductCategories(type)
+  const existingIndex = existingCategories.findIndex((item) => item.key === key)
+  if (existingIndex >= 0) {
+    if (existingCategories[existingIndex]?.name === name) return
+    const nextCategories = [...existingCategories]
+    nextCategories.splice(existingIndex, 1, { ...nextCategories[existingIndex], name })
+    productCategoryState.value = {
+      ...productCategoryState.value,
+      [type]: nextCategories,
+    }
+    return
+  }
+
+  const nextSort = existingCategories.length ? Math.max(...existingCategories.map((item) => Number(item.sort ?? 0) || 0)) + 10 : 10
+  productCategoryState.value = {
+    ...productCategoryState.value,
+    [type]: [...existingCategories, { key, name, type, sort: nextSort }],
+  }
+}
+
+async function ensureProductCategoriesLoaded(type: ProductType) {
+  const storedCategories = getStoredProductCategories(type)
+  if (storedCategories.length) {
+    return storedCategories
+  }
+
+  return fetchProductCategories(type)
 }
 
 function upsertProduct(nextProduct: Product) {
@@ -340,10 +383,15 @@ export function getStoredProductById(id: string) {
 }
 
 export async function saveStoredProduct(payload: SaveProductPayload) {
+  if (!isPreviewSessionActive()) {
+    await ensureProductCategoriesLoaded(payload.type)
+  }
+
+  const resolvedCategoryKey = resolveProductCategoryKey(payload.type, payload.category)
   if (isPreviewSessionActive()) {
     const existingProduct = payload.id ? getStoredProductById(payload.id) : undefined
-    const selectedCategory = getStoredProductCategories(payload.type).find((item) => item.key === payload.categoryKey)
-    const resolvedCategoryName = selectedCategory?.name ?? (payload.categoryKey || 'null')
+    const selectedCategory = getStoredProductCategories(payload.type).find((item) => item.key === resolvedCategoryKey)
+    const resolvedCategoryName = selectedCategory?.name ?? (payload.category.trim() || 'null')
     const nextProduct = updateProductMedia(
       {
         id: payload.id ?? `${payload.type}-${Date.now()}`,
@@ -351,7 +399,7 @@ export async function saveStoredProduct(payload: SaveProductPayload) {
         name: payload.title.trim() || 'null',
         subtitle: payload.subtitle.trim() || 'null',
         category: resolvedCategoryName,
-        categoryKey: payload.categoryKey,
+        categoryKey: resolvedCategoryKey,
         categoryName: resolvedCategoryName,
         scene: payload.origin.trim() || payload.brand.trim() || 'null',
         tag: payload.badge.trim() || payload.tags[0]?.trim() || 'null',
@@ -376,6 +424,7 @@ export async function saveStoredProduct(payload: SaveProductPayload) {
       },
       payload.galleryUrls,
     )
+    syncProductCategoryOption(payload.type, resolvedCategoryKey, resolvedCategoryName)
 
     upsertProduct(nextProduct)
     persistProducts()
@@ -395,6 +444,7 @@ export async function saveStoredProduct(payload: SaveProductPayload) {
       })
 
   const nextProduct = mapProduct(data)
+  syncProductCategoryOption(nextProduct.type, nextProduct.categoryKey ?? '', nextProduct.categoryName ?? nextProduct.category ?? '')
   upsertProduct(nextProduct)
   persistProducts()
   return nextProduct
@@ -538,7 +588,7 @@ export async function saveProductDetailImages(productId: string) {
       type: product.type,
       title: product.name,
       subtitle: product.subtitle === 'null' ? '' : product.subtitle,
-      categoryKey: product.categoryKey ?? '',
+      category: product.categoryName ?? product.categoryKey ?? '',
       brand: product.brand ?? '',
       origin: product.origin ?? '',
       description: product.description === 'null' ? '' : product.description,

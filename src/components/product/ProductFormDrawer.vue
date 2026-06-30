@@ -196,7 +196,7 @@ function createFormFromProduct(product: Product | null | undefined): ProductForm
   return {
     title: product.name === 'null' ? '' : product.name,
     subtitle: product.subtitle === 'null' ? '' : product.subtitle,
-    categoryKey: product.categoryKey ?? '',
+    categoryKey: product.categoryName ?? product.categoryKey ?? '',
     brand: product.brand ?? '',
     origin: product.origin ?? (product.scene === 'null' ? '' : product.scene),
     description: product.description === 'null' ? '' : product.description,
@@ -286,7 +286,7 @@ async function handleSubmit() {
       type: props.type,
       title: form.value.title,
       subtitle: form.value.subtitle,
-      categoryKey: form.value.categoryKey,
+      category: form.value.categoryKey,
       brand: form.value.brand,
       origin: form.value.origin,
       description: form.value.description,
@@ -335,3 +335,5 @@ watch(
   { immediate: true },
 )
 </script>
+
+

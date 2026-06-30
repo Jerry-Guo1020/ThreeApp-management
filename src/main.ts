@@ -5,6 +5,9 @@ import router from './router'
 import { hydrateCurrentUser } from './stores/user'
 import './style.css'
 
-void hydrateCurrentUser()
+async function bootstrap() {
+  await hydrateCurrentUser()
+  createApp(App).use(router).mount('#app')
+}
 
-createApp(App).use(router).mount('#app')
+void bootstrap()
