@@ -21,11 +21,3 @@ export async function uploadImage(file: File, usage = 'uploads') {
     body: formData,
   })
 }
-
-export function mockUpload(fileName: string) {
-  return {
-    url: `https://minio.example.com/threevine/uploads/${fileName}`,
-    fileName,
-    persisted: true,
-  }
-}

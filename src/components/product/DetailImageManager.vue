@@ -5,14 +5,14 @@
         <h2 class="text-lg font-extrabold text-slate-950">详情图配置</h2>
         <p class="mt-1 text-sm leading-6 text-slate-500">详情页预览统一按图片顺序拼接展示，不额外叠加文字内容。</p>
       </div>
-      <button class="btn-primary shrink-0 sm:w-auto" type="button" @click="handleSave">
+      <button class="btn-primary shrink-0 sm:w-auto" type="button" :disabled="uploading" @click="handleSave">
         <ImagePlus class="size-4" />
         保存详情图配置
       </button>
     </div>
 
     <div class="mt-5">
-      <UploadGrid title="拖拽上传详情图" hint="当前会生成可保存的演示图片地址" @selected="handleSelected" />
+      <UploadGrid title="拖拽上传详情图" hint="上传后会回填 MinIO 图片地址" @selected="handleSelected" />
     </div>
 
     <div class="mt-5 rounded-lg border border-slate-200 bg-white p-4">
@@ -73,7 +73,7 @@ import { GripVertical, ImagePlus, Trash2 } from '@lucide/vue'
 import AppToast from '@/components/common/AppToast.vue'
 import StatusBadge from '@/components/common/StatusBadge.vue'
 import UploadGrid from '@/components/common/UploadGrid.vue'
-import { mockUpload } from '@/api/upload'
+import { uploadImage } from '@/api/upload'
 import type { Product } from '@/types/product'
 import { appendProductDetailImages, removeProductDetailImage, reorderProductDetailImages, saveProductDetailImages } from '@/stores/products'
 
@@ -82,6 +82,7 @@ const props = defineProps<{
 }>()
 
 const draggingId = ref<string | null>(null)
+const uploading = ref(false)
 const toastOpen = ref(false)
 const toastTone = ref<'success' | 'error'>('success')
 const toastTitle = ref('')
@@ -118,17 +119,25 @@ function handleDrop(targetId: string) {
   draggingId.value = null
 }
 
-function handleSelected(fileNames: string[]) {
-  if (!fileNames.length) return
+async function handleSelected(_: string[], files: File[] = []) {
+  if (!files.length) return
 
-  const nextProduct = appendProductDetailImages(
-    localProduct.value.id,
-    fileNames.map((fileName) => mockUpload(fileName).url),
-  )
+  uploading.value = true
+  try {
+    const uploadResults = await Promise.all(files.map((file) => uploadImage(file, `${localProduct.value.type}/detail`)))
+    const nextProduct = appendProductDetailImages(
+      localProduct.value.id,
+      uploadResults.map((item) => item.publicUrl),
+    )
 
-  if (nextProduct) {
-    localProduct.value = nextProduct
-    openToast('success', '图片已加入', '新的详情图已加入当前排序列表，记得点击保存同步到后端。')
+    if (nextProduct) {
+      localProduct.value = nextProduct
+      openToast('success', '图片已加入', '新的详情图已上传到 MinIO，并加入当前排序列表。')
+    }
+  } catch (error) {
+    openToast('error', '上传失败', error instanceof Error ? error.message : '详情图上传失败，请稍后重试。')
+  } finally {
+    uploading.value = false
   }
 }
 

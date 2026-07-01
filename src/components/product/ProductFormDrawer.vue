@@ -83,29 +83,92 @@
             <ImagePlus class="size-4 text-teal-700" />
           </div>
 
-          <div>
-            <label class="mb-2 block text-sm font-bold text-slate-700">封面图地址</label>
-            <input v-model="form.coverUrl" class="input-field" placeholder="请输入封面图地址" />
-          </div>
-          <UploadGrid compact title="上传封面图" hint="当前会生成可保存的演示图片地址" :multiple="false" :current-label="form.coverUrl" @selected="handleCoverSelected" />
-
-          <div class="mt-3">
-            <label class="mb-2 block text-sm font-bold text-slate-700">详情图地址</label>
-            <UploadGrid compact title="上传详情图" hint="可一次选择多张图片，当前会生成演示地址" :current-label="`${form.galleryUrls.length} 张`" @selected="handleGallerySelected" />
-          </div>
-
-          <div class="space-y-2 rounded-xl border border-slate-200 bg-slate-50 p-3" v-if="form.galleryUrls.length">
-            <div v-for="(url, index) in form.galleryUrls" :key="`${url}-${index}`" class="rounded-lg bg-white p-3 ring-1 ring-slate-200">
-              <div class="flex items-start justify-between gap-3">
-                <div class="min-w-0 flex-1">
-                  <p class="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">详情图 {{ index + 1 }}</p>
-                  <p class="mt-2 break-all text-sm text-slate-600">{{ url }}</p>
-                </div>
-                <button class="text-xs font-bold text-rose-700" type="button" @click="removeGalleryUrl(index)">删除</button>
+          <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+            <div class="flex items-center justify-between gap-3">
+              <div>
+                <p class="text-sm font-extrabold text-slate-900">当前封面预览</p>
+                <p class="mt-1 text-xs leading-5 text-slate-500">选择图片后先在本地预览，点击最终保存时才会真正上传并写入数据库。</p>
               </div>
-              <button v-if="index !== 0" class="mt-3 text-xs font-bold text-teal-700" type="button" @click="setAsCover(url)">
-                设为封面图
-              </button>
+              <span class="rounded-full bg-white px-3 py-1 text-xs font-bold text-slate-500 ring-1 ring-slate-200">{{ mediaItems.length }} 张</span>
+            </div>
+
+            <div v-if="selectedCoverItem" class="mt-4 flex gap-3 rounded-xl bg-white p-3 ring-1 ring-slate-200">
+              <img :src="selectedCoverItem.previewUrl" :alt="selectedCoverItem.fileName" class="h-24 w-24 rounded-xl object-cover ring-1 ring-slate-200" />
+              <div class="min-w-0 flex-1">
+                <div class="flex flex-wrap items-center gap-2">
+                  <span class="rounded-full bg-amber-50 px-2.5 py-1 text-[11px] font-bold text-amber-700 ring-1 ring-amber-200">封面图</span>
+                  <span
+                    class="rounded-full px-2.5 py-1 text-[11px] font-bold ring-1"
+                    :class="selectedCoverItem.source === 'local' ? 'bg-sky-50 text-sky-700 ring-sky-200' : 'bg-emerald-50 text-emerald-700 ring-emerald-200'"
+                  >
+                    {{ selectedCoverItem.source === 'local' ? '待上传' : '已存在' }}
+                  </span>
+                </div>
+                <p class="mt-3 truncate text-sm font-bold text-slate-900">{{ selectedCoverItem.fileName }}</p>
+                <p class="mt-2 break-all text-xs leading-5 text-slate-500">{{ getMediaAddressLabel(selectedCoverItem) }}</p>
+              </div>
+            </div>
+            <p v-else class="mt-4 rounded-xl bg-white px-4 py-3 text-sm leading-6 text-slate-500 ring-1 ring-slate-200">
+              还没有选择商品图片。请先上传至少一张图片，再点击保存商品。
+            </p>
+          </div>
+
+          <div class="grid gap-3 sm:grid-cols-2">
+            <UploadGrid
+              compact
+              title="选择封面图"
+              hint="本地先预览，保存商品时再上传"
+              :multiple="false"
+              :selected-names="coverUploadNames"
+              @selected="handleCoverSelected"
+            />
+            <UploadGrid
+              compact
+              title="选择详情图"
+              hint="可多选，保存商品时统一上传"
+              :selected-names="galleryUploadNames"
+              @selected="handleGallerySelected"
+            />
+          </div>
+
+          <div v-if="mediaItems.length" class="space-y-2 rounded-xl border border-slate-200 bg-slate-50 p-3">
+            <div
+              v-for="(item, index) in mediaItems"
+              :key="item.id"
+              class="rounded-xl bg-white p-3 ring-1 ring-slate-200"
+            >
+              <div class="flex gap-3">
+                <img :src="item.previewUrl" :alt="item.fileName" class="h-20 w-20 rounded-xl object-cover ring-1 ring-slate-200" />
+                <div class="min-w-0 flex-1">
+                  <div class="flex items-start justify-between gap-3">
+                    <div class="min-w-0">
+                      <div class="flex flex-wrap items-center gap-2">
+                        <p class="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">图片 {{ index + 1 }}</p>
+                        <span v-if="item.id === coverMediaId" class="rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-bold text-amber-700 ring-1 ring-amber-200">
+                          当前封面
+                        </span>
+                        <span
+                          class="rounded-full px-2 py-0.5 text-[11px] font-bold ring-1"
+                          :class="item.source === 'local' ? 'bg-sky-50 text-sky-700 ring-sky-200' : 'bg-emerald-50 text-emerald-700 ring-emerald-200'"
+                        >
+                          {{ item.source === 'local' ? '待上传' : '已存在' }}
+                        </span>
+                      </div>
+                      <p class="mt-2 truncate text-sm font-bold text-slate-900">{{ item.fileName }}</p>
+                    </div>
+                    <button class="text-xs font-bold text-rose-700" type="button" @click="removeMediaItem(item.id)">删除</button>
+                  </div>
+                  <p class="mt-2 break-all text-xs leading-5 text-slate-500">{{ getMediaAddressLabel(item) }}</p>
+                  <button
+                    v-if="item.id !== coverMediaId"
+                    class="mt-3 text-xs font-bold text-teal-700"
+                    type="button"
+                    @click="setAsCover(item.id)"
+                  >
+                    设为封面图
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -113,31 +176,43 @@
 
       <footer class="flex flex-col gap-3 border-t border-slate-200 p-5">
         <div v-if="props.product" class="flex justify-start">
-          <button class="btn-secondary text-rose-700 sm:w-auto" type="button" :disabled="saving || deleting" @click="handleDelete">
+          <button class="btn-secondary text-rose-700 sm:w-auto" type="button" :disabled="saving || deleting" @click="deleteDialogOpen = true">
             {{ deleting ? '删除中...' : '删除商品' }}
           </button>
         </div>
         <div class="flex flex-col gap-3 sm:flex-row sm:justify-end">
           <button class="btn-secondary sm:w-auto" type="button" :disabled="saving || deleting" @click="emit('close')">取消</button>
-          <button class="btn-primary sm:w-auto" type="button" :disabled="saving || deleting || categoryLoading" @click="handleSubmit">
+          <button class="btn-primary sm:w-auto" type="button" :disabled="saving || deleting || uploading || categoryLoading" @click="handleSubmit">
             <Save class="size-4" />
-            {{ saving ? '保存中...' : '保存' }}
+            {{ submitButtonText }}
           </button>
         </div>
       </footer>
 
       <AppToast :open="toastOpen" :tone="toastTone" :title="toastTitle" :message="toastMessage" @close="toastOpen = false" />
+      <ConfirmDialog
+        :open="deleteDialogOpen"
+        title="删除商品"
+        description="该操作会同步删除数据库中的商品记录。"
+        :message="props.product ? `确认删除 ${props.product.name} 吗？删除后不可恢复。` : '确认删除当前商品吗？删除后不可恢复。'"
+        confirm-text="确认删除"
+        loading-text="删除中..."
+        :loading="deleting"
+        @cancel="handleCancelDelete"
+        @confirm="handleDelete"
+      />
     </aside>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { ImagePlus, Save, X } from '@lucide/vue'
 
 import AppToast from '@/components/common/AppToast.vue'
+import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import UploadGrid from '@/components/common/UploadGrid.vue'
-import { mockUpload } from '@/api/upload'
+import { uploadImage } from '@/api/upload'
 import type { Product, ProductCategoryOption, ProductType } from '@/types/product'
 import { productTypeLabels } from '@/data/mockData'
 import {
@@ -158,10 +233,17 @@ interface ProductFormState {
   description: string
   badge: string
   tagsText: string
-  coverUrl: string
-  galleryUrls: string[]
   status: 'published' | 'draft'
   sort: number
+}
+
+interface ProductMediaItem {
+  id: string
+  source: 'remote' | 'local'
+  previewUrl: string
+  fileName: string
+  remoteUrl?: string
+  file?: File
 }
 
 const props = withDefaults(
@@ -180,17 +262,31 @@ const emit = defineEmits<{
 }>()
 
 const form = ref<ProductFormState>(createEmptyForm())
+const mediaItems = ref<ProductMediaItem[]>([])
+const coverMediaId = ref('')
 const saving = ref(false)
 const deleting = ref(false)
+const uploading = ref(false)
 const categoryLoading = ref(false)
 const categoryOptions = ref<ProductCategoryOption[]>([])
 const toastOpen = ref(false)
 const toastTone = ref<'success' | 'error'>('success')
 const toastTitle = ref('')
 const toastMessage = ref('')
+const deleteDialogOpen = ref(false)
 
 const isWine = computed(() => props.type === 'wine')
 const title = computed(() => `${props.product ? '编辑' : '新增'}${productTypeLabels[props.type]}商品`)
+const selectedCoverItem = computed(() => mediaItems.value.find((item) => item.id === coverMediaId.value) ?? mediaItems.value[0] ?? null)
+const coverUploadNames = computed(() => (selectedCoverItem.value ? [selectedCoverItem.value.fileName] : []))
+const galleryUploadNames = computed(() =>
+  mediaItems.value.filter((item) => item.id !== selectedCoverItem.value?.id).map((item) => item.fileName),
+)
+const submitButtonText = computed(() => {
+  if (saving.value && uploading.value) return '上传并保存中...'
+  if (saving.value) return '保存中...'
+  return '保存'
+})
 
 function createEmptyForm(): ProductFormState {
   const nextSort = getStoredProductsByType(props.type).length + 1
@@ -203,8 +299,6 @@ function createEmptyForm(): ProductFormState {
     description: '',
     badge: '',
     tagsText: '',
-    coverUrl: '',
-    galleryUrls: [],
     status: 'draft',
     sort: nextSort,
   }
@@ -224,8 +318,6 @@ function createFormFromProduct(product: Product | null | undefined): ProductForm
     description: product.description === 'null' ? '' : product.description,
     badge: product.badge ?? (product.tag === 'null' ? '' : product.tag),
     tagsText: (product.tags ?? []).join(', '),
-    coverUrl: product.coverUrl ?? '',
-    galleryUrls: [...(product.galleryUrls ?? [])],
     status: product.status === 'published' ? 'published' : 'draft',
     sort: product.sort || 1,
   }
@@ -252,10 +344,6 @@ async function loadCategoryOptions() {
   }
 }
 
-function normalizeGalleryUrls() {
-  return Array.from(new Set([form.value.coverUrl, ...form.value.galleryUrls].map((item) => item.trim()).filter(Boolean)))
-}
-
 function normalizeTags() {
   return form.value.tagsText
     .split(/[，,]/)
@@ -263,45 +351,134 @@ function normalizeTags() {
     .filter(Boolean)
 }
 
-function setAsCover(url: string) {
-  form.value.coverUrl = url
-  form.value.galleryUrls = [url, ...form.value.galleryUrls.filter((item) => item !== url)]
-}
+function extractFileName(value: string) {
+  const normalizedValue = value.split('?')[0] ?? value
+  const lastSegment = normalizedValue.split('/').pop() ?? ''
+  if (!lastSegment) return '已上传图片'
 
-function removeGalleryUrl(index: number) {
-  const removed = form.value.galleryUrls[index]
-  form.value.galleryUrls = form.value.galleryUrls.filter((_, currentIndex) => currentIndex !== index)
-  if (removed && removed === form.value.coverUrl) {
-    form.value.coverUrl = form.value.galleryUrls[0] ?? ''
+  try {
+    return decodeURIComponent(lastSegment)
+  } catch {
+    return lastSegment
   }
 }
 
-function handleCoverSelected(fileNames: string[]) {
-  const [fileName] = fileNames
-  if (!fileName) return
-
-  const uploadResult = mockUpload(fileName)
-  form.value.coverUrl = uploadResult.url
-  setAsCover(uploadResult.url)
+function createRemoteMediaItem(url: string, index: number): ProductMediaItem {
+  const normalizedUrl = url.trim()
+  return {
+    id: `remote-${index}-${normalizedUrl}`,
+    source: 'remote',
+    previewUrl: normalizedUrl,
+    fileName: extractFileName(normalizedUrl),
+    remoteUrl: normalizedUrl,
+  }
 }
 
-function handleGallerySelected(fileNames: string[]) {
-  if (!fileNames.length) return
-
-  const nextUrls = fileNames.map((fileName) => mockUpload(fileName).url)
-  form.value.galleryUrls = Array.from(new Set([...form.value.galleryUrls, ...nextUrls]))
-  if (!form.value.coverUrl) {
-    form.value.coverUrl = form.value.galleryUrls[0] ?? ''
+function createLocalMediaItem(file: File): ProductMediaItem {
+  return {
+    id: `local-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    source: 'local',
+    previewUrl: URL.createObjectURL(file),
+    fileName: file.name,
+    file,
   }
+}
+
+function releaseLocalMediaItem(item: ProductMediaItem) {
+  if (item.source === 'local') {
+    URL.revokeObjectURL(item.previewUrl)
+  }
+}
+
+function replaceMediaItems(items: ProductMediaItem[], nextCoverId = '') {
+  mediaItems.value.forEach(releaseLocalMediaItem)
+  mediaItems.value = items
+  coverMediaId.value = nextCoverId || items[0]?.id || ''
+}
+
+function buildMediaItemsFromProduct(product: Product | null | undefined) {
+  const urls = Array.from(
+    new Set([product?.coverUrl ?? '', ...(product?.galleryUrls ?? [])].map((item) => item.trim()).filter(Boolean)),
+  )
+  const items = urls.map((url, index) => createRemoteMediaItem(url, index))
+  const coverId = items.find((item) => item.remoteUrl === product?.coverUrl?.trim())?.id ?? items[0]?.id ?? ''
+  return { items, coverId }
+}
+
+function getMediaAddressLabel(item: ProductMediaItem) {
+  if (item.source === 'remote') {
+    return item.remoteUrl ?? ''
+  }
+  return '本地待上传，点击保存商品后才会生成正式图片地址。'
+}
+
+function moveMediaItemToFront(itemId: string) {
+  const currentIndex = mediaItems.value.findIndex((item) => item.id === itemId)
+  if (currentIndex <= 0) return
+
+  const nextItems = [...mediaItems.value]
+  const [targetItem] = nextItems.splice(currentIndex, 1)
+  nextItems.unshift(targetItem)
+  mediaItems.value = nextItems
+}
+
+function setAsCover(itemId: string) {
+  coverMediaId.value = itemId
+  moveMediaItemToFront(itemId)
+}
+
+function removeMediaItem(itemId: string) {
+  const target = mediaItems.value.find((item) => item.id === itemId)
+  if (!target) return
+
+  releaseLocalMediaItem(target)
+  mediaItems.value = mediaItems.value.filter((item) => item.id !== itemId)
+  if (coverMediaId.value === itemId) {
+    coverMediaId.value = mediaItems.value[0]?.id ?? ''
+  }
+}
+
+function handleCoverSelected(_: string[], files: File[] = []) {
+  const [file] = files
+  if (!file) return
+
+  const nextItem = createLocalMediaItem(file)
+  mediaItems.value = [nextItem, ...mediaItems.value]
+  coverMediaId.value = nextItem.id
+}
+
+function handleGallerySelected(_: string[], files: File[] = []) {
+  if (!files.length) return
+
+  const nextItems = files.map(createLocalMediaItem)
+  mediaItems.value = [...mediaItems.value, ...nextItems]
+  if (!coverMediaId.value) {
+    coverMediaId.value = nextItems[0]?.id ?? ''
+  }
+}
+
+async function resolveMediaUrlsForSubmit() {
+  return Promise.all(
+    mediaItems.value.map(async (item) => {
+      if (item.source === 'remote' && item.remoteUrl) {
+        return item.remoteUrl
+      }
+
+      if (!item.file) {
+        throw new Error('存在未识别的本地图片，请重新选择后再保存。')
+      }
+
+      const usage = item.id === coverMediaId.value ? `${props.type}/cover` : `${props.type}/gallery`
+      const uploadResult = await uploadImage(item.file, usage)
+      return uploadResult.publicUrl
+    }),
+  )
 }
 
 async function handleSubmit() {
   saving.value = true
 
   try {
-    const galleryUrls = normalizeGalleryUrls()
-    const coverUrl = form.value.coverUrl.trim() || galleryUrls[0] || ''
-
     if (!form.value.title.trim()) {
       openToast('error', '保存失败', '请先填写商品标题。')
       return
@@ -316,6 +493,17 @@ async function handleSubmit() {
       openToast('error', '保存失败', isWine.value ? '请先选择风味类型。' : '请先选择商品分类。')
       return
     }
+
+    if (!mediaItems.value.length) {
+      openToast('error', '保存失败', '请先补充商品图片。')
+      return
+    }
+
+    uploading.value = true
+    const resolvedUrls = await resolveMediaUrlsForSubmit()
+    const coverIndex = mediaItems.value.findIndex((item) => item.id === coverMediaId.value)
+    const coverUrl = resolvedUrls[coverIndex] ?? resolvedUrls[0] ?? ''
+    const galleryUrls = [coverUrl, ...resolvedUrls.filter((_, index) => index !== coverIndex)]
 
     if (!coverUrl) {
       openToast('error', '保存失败', '请先补充商品封面图。')
@@ -340,24 +528,27 @@ async function handleSubmit() {
       slug: props.product?.slug,
     })
 
-    openToast('success', '保存成功', `${form.value.title.trim()} 已同步到后端。`)
+    openToast('success', '保存成功', `${form.value.title.trim()} 已在提交时完成图片上传并同步到后端。`)
     emit('close')
   } catch (error) {
     openToast('error', '保存失败', getErrorMessage(error))
   } finally {
+    uploading.value = false
     saving.value = false
   }
 }
 
+function handleCancelDelete() {
+  if (deleting.value) return
+  deleteDialogOpen.value = false
+}
+
 async function handleDelete() {
   if (!props.product?.id) return
-  if (typeof window !== 'undefined' && !window.confirm(`确认删除 ${props.product.name} 吗？`)) {
-    return
-  }
-
   deleting.value = true
   try {
     await deleteStoredProduct(props.product.id)
+    deleteDialogOpen.value = false
     openToast('success', '删除成功', `${props.product.name} 已从后端移除。`)
     emit('close')
   } catch (error) {
@@ -370,11 +561,23 @@ async function handleDelete() {
 watch(
   () => [props.open, props.product, props.type] as const,
   async ([open]) => {
-    if (!open) return
+    deleteDialogOpen.value = false
+
+    if (!open) {
+      replaceMediaItems([])
+      return
+    }
+
     form.value = createFormFromProduct(props.product)
     categoryOptions.value = getStoredProductCategories(props.type)
+    const { items, coverId } = buildMediaItemsFromProduct(props.product)
+    replaceMediaItems(items, coverId)
     await loadCategoryOptions()
   },
   { immediate: true },
 )
+
+onBeforeUnmount(() => {
+  mediaItems.value.forEach(releaseLocalMediaItem)
+})
 </script>

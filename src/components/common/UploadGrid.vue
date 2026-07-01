@@ -32,6 +32,7 @@ const props = withDefaults(
     accept?: string
     multiple?: boolean
     currentLabel?: string
+    selectedNames?: string[]
   }>(),
   {
     title: '拖拽上传图片',
@@ -48,10 +49,12 @@ const emit = defineEmits<{
 }>()
 
 const inputRef = ref<HTMLInputElement | null>(null)
-const selectedNames = ref<string[]>([])
+const localSelectedNames = ref<string[]>([])
+const hasControlledNames = computed(() => props.selectedNames !== undefined)
 
 const displayNames = computed(() => {
-  if (selectedNames.value.length > 0) return selectedNames.value
+  if (hasControlledNames.value) return props.selectedNames ?? []
+  if (localSelectedNames.value.length > 0) return localSelectedNames.value
   if (props.currentLabel.trim()) return [props.currentLabel.trim()]
   return []
 })
@@ -64,7 +67,12 @@ function handleFileChange(event: Event) {
   const target = event.target as HTMLInputElement
   const files = Array.from(target.files ?? [])
   const fileNames = files.map((file) => file.name)
-  selectedNames.value = fileNames
+
+  if (!hasControlledNames.value) {
+    localSelectedNames.value = fileNames
+  }
+
+  target.value = ''
   emit('selected', fileNames, files)
 }
 </script>
