@@ -24,7 +24,21 @@
           <div class="grid grid-cols-2 gap-3">
             <div>
               <label class="mb-2 block text-sm font-bold text-slate-700">{{ isWine ? '风味类型' : '分类' }}</label>
-              <input v-model="form.categoryKey" class="input-field" :placeholder="isWine ? '请输入风味类型' : '请输入分类'" />
+              <select v-if="categoryOptions.length" v-model="form.categoryKey" class="input-field">
+                <option value="">请选择{{ isWine ? '风味类型' : '商品分类' }}</option>
+                <option v-for="option in categoryOptions" :key="option.key" :value="option.key">
+                  {{ option.name }}
+                </option>
+              </select>
+              <input
+                v-else
+                v-model="form.categoryKey"
+                class="input-field"
+                :placeholder="categoryLoading ? '分类加载中...' : isWine ? '请输入风味类型' : '请输入分类'"
+              />
+              <p v-if="!categoryLoading && !categoryOptions.length" class="mt-2 text-xs leading-5 text-amber-700">
+                当前后台分类为空，新增商品前请先初始化 `product_categories` 数据。
+              </p>
             </div>
             <div>
               <label class="mb-2 block text-sm font-bold text-slate-700">{{ isWine ? '使用场景' : '地区 / 产地' }}</label>
@@ -105,7 +119,7 @@
         </div>
         <div class="flex flex-col gap-3 sm:flex-row sm:justify-end">
           <button class="btn-secondary sm:w-auto" type="button" :disabled="saving || deleting" @click="emit('close')">取消</button>
-          <button class="btn-primary sm:w-auto" type="button" :disabled="saving || deleting" @click="handleSubmit">
+          <button class="btn-primary sm:w-auto" type="button" :disabled="saving || deleting || categoryLoading" @click="handleSubmit">
             <Save class="size-4" />
             {{ saving ? '保存中...' : '保存' }}
           </button>
@@ -124,9 +138,15 @@ import { ImagePlus, Save, X } from '@lucide/vue'
 import AppToast from '@/components/common/AppToast.vue'
 import UploadGrid from '@/components/common/UploadGrid.vue'
 import { mockUpload } from '@/api/upload'
-import type { Product, ProductType } from '@/types/product'
+import type { Product, ProductCategoryOption, ProductType } from '@/types/product'
 import { productTypeLabels } from '@/data/mockData'
-import { deleteStoredProduct, getStoredProductsByType, saveStoredProduct } from '@/stores/products'
+import {
+  deleteStoredProduct,
+  fetchProductCategories,
+  getStoredProductCategories,
+  getStoredProductsByType,
+  saveStoredProduct,
+} from '@/stores/products'
 import { getErrorMessage } from '@/utils/request'
 
 interface ProductFormState {
@@ -162,6 +182,8 @@ const emit = defineEmits<{
 const form = ref<ProductFormState>(createEmptyForm())
 const saving = ref(false)
 const deleting = ref(false)
+const categoryLoading = ref(false)
+const categoryOptions = ref<ProductCategoryOption[]>([])
 const toastOpen = ref(false)
 const toastTone = ref<'success' | 'error'>('success')
 const toastTitle = ref('')
@@ -196,7 +218,7 @@ function createFormFromProduct(product: Product | null | undefined): ProductForm
   return {
     title: product.name === 'null' ? '' : product.name,
     subtitle: product.subtitle === 'null' ? '' : product.subtitle,
-    categoryKey: product.categoryName ?? product.categoryKey ?? '',
+    categoryKey: product.categoryKey ?? product.categoryName ?? '',
     brand: product.brand ?? '',
     origin: product.origin ?? (product.scene === 'null' ? '' : product.scene),
     description: product.description === 'null' ? '' : product.description,
@@ -214,6 +236,20 @@ function openToast(tone: 'success' | 'error', titleText: string, message: string
   toastTitle.value = titleText
   toastMessage.value = message
   toastOpen.value = true
+}
+
+async function loadCategoryOptions() {
+  categoryLoading.value = true
+
+  try {
+    const loaded = await fetchProductCategories(props.type)
+    categoryOptions.value = loaded
+  } catch (error) {
+    categoryOptions.value = getStoredProductCategories(props.type)
+    openToast('error', '分类读取失败', getErrorMessage(error, '商品分类读取失败，请稍后重试。'))
+  } finally {
+    categoryLoading.value = false
+  }
 }
 
 function normalizeGalleryUrls() {
@@ -271,8 +307,13 @@ async function handleSubmit() {
       return
     }
 
+    if (!categoryOptions.value.length) {
+      openToast('error', '保存失败', '后台商品分类为空，请先初始化 product_categories 数据后再保存商品。')
+      return
+    }
+
     if (!form.value.categoryKey.trim()) {
-      openToast('error', '保存失败', isWine.value ? '请先填写风味类型。' : '请先填写商品分类。')
+      openToast('error', '保存失败', isWine.value ? '请先选择风味类型。' : '请先选择商品分类。')
       return
     }
 
@@ -328,12 +369,12 @@ async function handleDelete() {
 
 watch(
   () => [props.open, props.product, props.type] as const,
-  ([open]) => {
+  async ([open]) => {
     if (!open) return
     form.value = createFormFromProduct(props.product)
+    categoryOptions.value = getStoredProductCategories(props.type)
+    await loadCategoryOptions()
   },
   { immediate: true },
 )
 </script>
-
-

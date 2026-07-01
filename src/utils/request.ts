@@ -59,6 +59,15 @@ interface RequestOptions extends RequestInit {
   auth?: boolean
 }
 
+function normalizeApiErrorMessage(message: string) {
+  const categoryMissing = message.match(/^Category\s+(.+)\s+does not exist for\s+(wine|specialty)$/)
+  if (categoryMissing) {
+    return '后台商品分类尚未初始化，请先检查 product_categories 数据或执行 002_seed.sql 后再保存商品。'
+  }
+
+  return message
+}
+
 export async function request<T>(path: string, options: RequestOptions = {}): Promise<ApiResponse<T>> {
   const headers = new Headers(options.headers)
   const isFormData = typeof FormData !== 'undefined' && options.body instanceof FormData
@@ -90,7 +99,7 @@ export async function request<T>(path: string, options: RequestOptions = {}): Pr
   if (!response.ok) {
     const message =
       typeof payload === 'object' && payload !== null && 'message' in payload
-        ? String((payload as { message?: unknown }).message ?? `Request failed with ${response.status}`)
+        ? normalizeApiErrorMessage(String((payload as { message?: unknown }).message ?? `Request failed with ${response.status}`))
         : `Request failed with ${response.status}`
 
     throw new RequestError(message, {
