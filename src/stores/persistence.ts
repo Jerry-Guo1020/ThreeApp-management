@@ -1,3 +1,5 @@
+import { normalizeMediaPayload } from '@/utils/mediaUrl'
+
 export function cloneSeed<T>(value: T): T {
   return JSON.parse(JSON.stringify(value)) as T
 }
@@ -29,7 +31,7 @@ export function readStorage<T>(key: string, fallback: T): T {
   if (!stored) return cloneSeed(fallback)
 
   try {
-    return stripPlaceholderMediaUrls(JSON.parse(stored)) as T
+    return normalizeMediaPayload(stripPlaceholderMediaUrls(JSON.parse(stored))) as T
   } catch {
     return cloneSeed(fallback)
   }
@@ -37,7 +39,7 @@ export function readStorage<T>(key: string, fallback: T): T {
 
 export function writeStorage<T>(key: string, value: T) {
   if (typeof window === 'undefined') return
-  window.localStorage.setItem(key, JSON.stringify(value))
+  window.localStorage.setItem(key, JSON.stringify(normalizeMediaPayload(value)))
 }
 
 export function removeStorage(key: string) {

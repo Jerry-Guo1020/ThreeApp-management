@@ -1,3 +1,5 @@
+import { normalizeMediaPayload } from './mediaUrl'
+
 export interface ApiResponse<T> {
   code: number
   message: string
@@ -120,7 +122,7 @@ export async function request<T>(path: string, options: RequestOptions = {}): Pr
 
 export async function requestData<T>(path: string, options: RequestOptions = {}) {
   const response = await request<T>(path, options)
-  return response.data
+  return normalizeMediaPayload(response.data)
 }
 
 export function getErrorMessage(error: unknown, fallback = '请求失败，请稍后重试。') {

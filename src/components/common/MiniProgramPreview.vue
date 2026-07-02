@@ -18,11 +18,11 @@
         <div class="space-y-3 p-4">
           <div
             class="h-28 rounded-lg bg-gradient-to-br"
-            :class="props.product.coverUrl ? '' : props.product.imageTone"
-            :style="props.product.coverUrl ? { backgroundImage: `url(${props.product.coverUrl})`, backgroundSize: 'cover', backgroundPosition: 'center' } : undefined"
+            :class="normalizedCoverUrl ? '' : props.product.imageTone"
+            :style="normalizedCoverUrl ? { backgroundImage: `url(${normalizedCoverUrl})`, backgroundSize: 'cover', backgroundPosition: 'center' } : undefined"
           />
           <div
-            v-for="image in props.product.detailImages.filter((item) => item.status === 'visible')"
+            v-for="image in visibleDetailImages"
             :key="image.id"
             class="h-28 rounded-lg bg-gradient-to-br"
             :class="image.url ? '' : image.tone"
@@ -38,8 +38,20 @@
 import { Smartphone } from '@lucide/vue'
 
 import type { Product } from '@/types/product'
+import { computed } from 'vue'
+import { normalizeMediaUrl } from '@/utils/mediaUrl'
 
 const props = defineProps<{
   product: Product
 }>()
+
+const normalizedCoverUrl = computed(() => (props.product.coverUrl ? normalizeMediaUrl(props.product.coverUrl) : ''))
+const visibleDetailImages = computed(() =>
+  props.product.detailImages
+    .filter((item) => item.status === 'visible')
+    .map((item) => ({
+      ...item,
+      url: item.url ? normalizeMediaUrl(item.url) : item.url,
+    })),
+)
 </script>

@@ -76,6 +76,7 @@ import UploadGrid from '@/components/common/UploadGrid.vue'
 import { uploadImage } from '@/api/upload'
 import type { Product } from '@/types/product'
 import { appendProductDetailImages, removeProductDetailImage, reorderProductDetailImages, saveProductDetailImages } from '@/stores/products'
+import { normalizeMediaUrl } from '@/utils/mediaUrl'
 
 const props = defineProps<{
   product: Product
@@ -97,7 +98,14 @@ watch(
   { immediate: true },
 )
 
-const orderedImages = computed(() => [...localProduct.value.detailImages].sort((a, b) => a.sort - b.sort))
+const orderedImages = computed(() =>
+  [...localProduct.value.detailImages]
+    .sort((a, b) => a.sort - b.sort)
+    .map((image) => ({
+      ...image,
+      url: image.url ? normalizeMediaUrl(image.url) : image.url,
+    })),
+)
 
 function openToast(tone: 'success' | 'error', title: string, message: string) {
   toastTone.value = tone
